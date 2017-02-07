@@ -14,11 +14,14 @@
     <button type="button" class="box" onclick="addCommand('down')">DOWN</button>
     <button type="button" class="box" onclick="addCommand('left')">LEFT</button>
     <button type="button" class="box" onclick="addCommand('right')">RIGHT</button>
+    <button type="button" class="box" onclick="undo()">UNDO</button>
 
     <button type="button" class="box" name="commands" onclick="submitCmds()">Submit</button>
     <!--
       Input element we use to pass the commands array
     -->
+    <p id="sequence_vis" value="">
+    </p>
     <input type="hidden" name="cmd[cmd]" id="sequence" value=10>
   </body>
   <script>
@@ -30,7 +33,23 @@
     };
     function addCommand(cmd) {
       commands.push(cmd);
+      var currSequence = document.getElementById("sequence_vis");
+      currSequence.innerHTML = "Commands:";
+
+      for (var i = 0; i < commands.length; i++) {
+          currSequence.innerHTML += " " + commands[i];
+      }
       console.log(cmd + ' was added to command queue');
+      console.log(commands);
+    };
+    function undo() {
+      var cmd = commands.pop();
+      var currSequence = document.getElementById("sequence_vis");
+      currSequence.innerHTML = "Commands:";
+      for (var i = 0; i < commands.length; i++) {
+          currSequence.innerHTML += " " + commands[i];
+      }
+      console.log(cmd + ' was removed from command queue');
       console.log(commands);
     };
   </script>

@@ -18,7 +18,7 @@ const serialport = require('serialport');
 const app = express();
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
-// ejs is something we will use later to make the html better
+// ejs is something we may use late to make the page look a little prettier
 app.engine('html', require('ejs').renderFile);
 
 /** bodyParser.urlencoded(options)
@@ -49,10 +49,10 @@ app.get('/', function getIndex(req, res) {
 app.post('/', function handlePost(req, res) {
   console.log('POST /index');
   console.log(req.body.cmd);
+  console.log();
   // right back to the page
   res.render('index.html');
 });
-
 
 /**
  * Start Express server.
