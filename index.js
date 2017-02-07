@@ -41,6 +41,17 @@ app.get('/', function getIndex(req, res) {
   console.log('GET: /index');
   res.render('index.html');
 });
+/*
+  This is where we will handle the series of commands to the bot.
+  On a post, we will read an array of commands and send them to
+  the arduino over serialport
+*/
+app.post('/', function handlePost(req, res) {
+  console.log('POST /index');
+  console.log(req.body.cmd);
+  // right back to the page
+  res.render('index.html');
+});
 
 
 /**

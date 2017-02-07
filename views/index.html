@@ -3,6 +3,28 @@
 <head>
   <title>Robot-Interface</title>
 </head>
-<body>
-  <h1>Enlight Arduino-Bot interface</h1>
-</body>
+ <form method="post" id="form" action="/">
+  <body>
+    <h1>Enlight Arduino-Bot interface</h1>
+    <button type="button" class="box" onclick="addCommand('up')">UP</button>
+    <button type="button" class="box" onclick="addCommand('down')">DOWN</button>
+    <button type="button" class="box" onclick="addCommand('left')">LEFT</button>
+    <button type="button" class="box" onclick="addCommand('right')">RIGHT</button>
+
+    <button type="button" class="box" name="commands" onclick="submitCmds()">Submit</button>
+    <input type="hidden" name="cmd[cmd]" id="sequence" value=10>
+  </body>
+  <script>
+    var commands = [];
+    function submitCmds() {
+      var element = document.getElementById("sequence");
+      element.value = commands;
+      document.getElementById("form").submit();
+    };
+    function addCommand(cmd) {
+      commands.push(cmd);
+      console.log(cmd + ' was added to command queue');
+      console.log(commands);
+    };
+  </script>
+</form>
