@@ -1,0 +1,33 @@
+{
+  "name": "robot-interface",
+  "version": "0.1.0",
+  "description": "Robot interface to queue up commands to send to an Arduino robot.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UW-Enlight/Robot-Interface.git"
+  },
+  "keywords": [
+    "Enlight",
+    "Arduino",
+    "Node",
+    "NPM",
+    "Serial",
+    "Robot"
+  ],
+  "author": "Enlight Student Organization",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UW-Enlight/Robot-Interface/issues"
+  },
+  "homepage": "https://github.com/UW-Enlight/Robot-Interface#readme",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "express": "^4.14.1",
+    "serialport": "^4.0.7"
+  },
+  "devDependencies": {}
+}
