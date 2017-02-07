@@ -6,12 +6,19 @@
  <form method="post" id="form" action="/">
   <body>
     <h1>Enlight Arduino-Bot interface</h1>
+    <!--
+      NOTE: These are HTML5 buttons, so by default they have a 'submit' behaviour
+      to get around this, we type="button" to remove this behaviour
+    -->
     <button type="button" class="box" onclick="addCommand('up')">UP</button>
     <button type="button" class="box" onclick="addCommand('down')">DOWN</button>
     <button type="button" class="box" onclick="addCommand('left')">LEFT</button>
     <button type="button" class="box" onclick="addCommand('right')">RIGHT</button>
 
     <button type="button" class="box" name="commands" onclick="submitCmds()">Submit</button>
+    <!--
+      Input element we use to pass the commands array
+    -->
     <input type="hidden" name="cmd[cmd]" id="sequence" value=10>
   </body>
   <script>
