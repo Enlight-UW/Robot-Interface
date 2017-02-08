@@ -13,9 +13,8 @@
 	   style="border:1px solid #000;">
   </canvas>
     <br/>
-  <input id="slider1" type="range" min="0" max="100" />
+  <input id="slider1" type="range" min="-100" max="100" />
   <input id="slider2" type="range" min="-100" max="100" />
-  Ball Camera<input type="checkbox" id="ballView"/>
     <script src="twgl-full.min.js"></script>
     <script>
 function setup() { "use strict";
@@ -25,10 +24,8 @@ function setup() { "use strict";
   
   var slider1 = document.getElementById('slider1');
   var slider2 = document.getElementById('slider2');
-  var ballView = document.getElementById('ballView');
   slider1.value = 35;
   slider2.value = 0;
-  ballView.checked = false;
                 
   function moveToTx(x,y,z,Tx) {
     var loc = [x,y,z];
@@ -92,6 +89,7 @@ function setup() { "use strict";
 	//color of head
 	context.fillStyle = arrow.fColor;
 	context.strokeStyle = arrow.sColor;
+	context.lineWidth = 10;
   
     // rectangle
 	context.beginPath();
@@ -131,6 +129,24 @@ function setup() { "use strict";
 	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();
 	
+	//left side backward
+	context.beginPath();
+	moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
+	lineToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
+	//right side forward
+	context.beginPath();
+	moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
+	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
+	//right side backward
+	context.beginPath();
+	moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);
+	lineToTx(xc - rx,yc - ry,zc + zr,Tx);lineToTx(xc - rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
 	context.restore();
   }
 
@@ -153,10 +169,13 @@ function setup() { "use strict";
     var Tmodelview=m4.multiply(Tmodel,Tcamera);
 	
 	//arrow objects
-	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "white", fColor: "rgb(189,32,49)"};
 	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
 	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
 	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	
+	//backdrop
+	var background = {xc: 0, yc: -1, zc: 0, xr: 1600, yr: 1, zr:1600, color: "black"};
 	
 	//game variable, whether game is running or over
 	var game = "running";
@@ -167,11 +186,12 @@ function setup() { "use strict";
 		//clear canvas
 		canvas.width = canvas.width;
 		
-		//updateCamera();
+		updateCamera();
 		
 		
 		//resetGame();
 		
+		drawCube(background, Tmodelview);
 		drawArrow(upArrow, Tmodelview);
 		
 		window.requestAnimationFrame(update);
@@ -189,23 +209,13 @@ function setup() { "use strict";
 		angle1 = slider1.value*0.01*Math.PI;
 		angle3 = (slider2.value * 3) + 300;
 		
-		//decide camera view
-		if(ballView.checked) {
-			eye = [tennisBall.xc + 100, tennisBall.yc + 100, tennisBall.zc + 100];
-		}
-		else {
-			eye=[500*Math.cos(angle1),angle3,500*Math.sin(angle1)];
-		}
+		eye=[500*Math.cos(angle1),angle3,500*Math.sin(angle1)];
 		
         Tcamera=m4.inverse(m4.lookAt(eye,target,up));   
 		Tmodelview=m4.multiply(Tmodel,Tcamera);
-		
-		//update ball modelview
-		ballTmodelview=m4.multiply(ballTmodel,Tcamera);
-		
-		//update racquet modelviews
-		backTmodelview=m4.multiply(backTmodel,Tcamera);
-		forTmodelview=m4.multiply(forTmodel,Tcamera);
+		console.log(angle1);
+		console.log(angle3);
+
 	}
 	
     drawAxes(Tcamera);
