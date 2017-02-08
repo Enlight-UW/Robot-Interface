@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="Tennis Match" content="Tennis match played first to 11 points">
+  <meta charset="utf-8">
+  <title>TWGL 101</title>
+  <!-- you need to load TWGL from somewhere -
+    -- this grabs it from the CS server, which
+    -- might take a while
+    -->
+  <canvas id="myCanvas" 
+	   width="800" height="600"
+	   style="border:1px solid #000;">
+  </canvas>
+    <br/>
+  <input id="slider1" type="range" min="0" max="100" />
+  <input id="slider2" type="range" min="-100" max="100" />
+  Ball Camera<input type="checkbox" id="ballView"/>
+    <script src="twgl-full.min.js"></script>
+    <script>
+function setup() { "use strict";
+  var canvas = document.getElementById('myCanvas');
+  var context = canvas.getContext('2d');
+  var m4 = twgl.m4;
+  
+  var slider1 = document.getElementById('slider1');
+  var slider2 = document.getElementById('slider2');
+  var ballView = document.getElementById('ballView');
+  slider1.value = 35;
+  slider2.value = 0;
+  ballView.checked = false;
+                
+  function moveToTx(x,y,z,Tx) {
+    var loc = [x,y,z];
+    var locTx = m4.transformPoint(Tx,loc);
+    context.moveTo(locTx[0]+250,-locTx[1]+250);
+  }
+
+  function lineToTx(x,y,z,Tx) {
+    var loc = [x,y,z];
+    var locTx = m4.transformPoint(Tx,loc);
+    context.lineTo(locTx[0]+250,-locTx[1]+250);
+  }
+                
+  function drawAxes(Tx) {
+    // A little cross on the front face, for identification
+    moveToTx(0,0,0,Tx);lineToTx(50,0,0,Tx);context.stroke();
+    moveToTx(0,0,0,Tx);lineToTx(0,150,0,Tx);context.stroke();
+    moveToTx(0,0,0,Tx);lineToTx(0,0,250,Tx);context.stroke();
+  }
+
+  function drawCube(cube, Tx) {
+	
+	//centers of cube
+	var xc=cube.xc, yc=cube.yc, zc=cube.zc;
+	
+	//radiuses of cube
+    var rx=cube.xr,ry=cube.yr,zr=cube.zr;
+	
+	context.beginPath();
+	
+	//color of cube
+	context.fillStyle = cube.color;
+	
+  
+    // Twelve edges of a cube
+    moveToTx(xc - rx,yc - ry,zc - zr,Tx);lineToTx(xc + rx,yc - ry,zc - zr,Tx);
+    lineToTx(xc + rx,yc + ry,zc - zr,Tx);lineToTx(xc - rx,yc + ry,zc - zr,Tx);context.stroke();context.fill();
+    moveToTx(xc + rx,yc - ry,zc - zr,Tx);lineToTx(xc + rx,yc - ry,zc + zr,Tx);
+    lineToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc - zr,Tx);context.stroke();context.fill();
+    moveToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc - rx,yc - ry,zc + zr,Tx);
+    lineToTx(xc - rx,yc + ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+    moveToTx(xc - rx,yc - ry,zc + zr,Tx);lineToTx(xc - rx,yc - ry,zc - zr,Tx);
+    lineToTx(xc - rx,yc + ry,zc - zr,Tx);lineToTx(xc - rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+	
+	//fill top part of cube
+	moveToTx(xc - rx,yc + ry,zc - zr,Tx);lineToTx(xc - rx,yc + ry,zc + zr,Tx);
+	lineToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc - zr,Tx);context.fill();
+	
+	context.closePath();
+  }
+  
+  function drawArrow(arrow, Tx) {
+  
+	context.save();
+	//centers of arrow
+	var xc=arrow.xc, yc=arrow.yc, zc=arrow.zc;
+	
+	//radiuses of arrow
+    var rx=arrow.xr,ry=arrow.yr,zr=arrow.zr;
+	
+	//color of head
+	context.fillStyle = arrow.fColor;
+	context.strokeStyle = arrow.sColor;
+  
+    // rectangle
+	context.beginPath();
+    moveToTx(xc - rx,yc - ry,zc - zr,Tx);lineToTx(xc + rx,yc - ry,zc - zr,Tx);
+    lineToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc - rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	context.beginPath();
+    moveToTx(xc - rx,yc + ry,zc - zr,Tx);lineToTx(xc + rx,yc + ry,zc - zr,Tx);
+    lineToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc - rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	context.beginPath();
+    moveToTx(xc - rx,yc - ry,zc - zr,Tx);lineToTx(xc - rx,yc - ry,zc + zr,Tx);
+    lineToTx(xc - rx,yc + ry,zc + zr,Tx);lineToTx(xc - rx,yc + ry,zc - zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	context.beginPath();
+    moveToTx(xc + rx,yc - ry,zc - zr,Tx);lineToTx(xc + rx,yc - ry,zc + zr,Tx);
+    lineToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc - zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
+	// triangle
+	
+	//top half
+	context.beginPath();
+	moveToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc + ry,zc + zr,Tx);
+	lineToTx(xc,yc + ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
+	//bottom half
+	context.beginPath();
+	moveToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
+	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
+	//left side forward
+	context.beginPath();
+	moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
+	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+	context.closePath();
+	
+	context.restore();
+  }
+
+  function draw() {
+    // hack to clear the canvas fast
+    canvas.width = canvas.width;
+    
+    var angle1 = slider1.value*0.01*Math.PI;
+    var angle2 = 0;
+	var angle3 = (slider2.value * 3) + 300;
+    var axis = [1,1,1];
+  
+    var Tmodel=m4.axisRotation(axis,angle2);
+
+    var eye=[500*Math.cos(angle1),angle3,500*Math.sin(angle1)];
+    var target=[0,0,0];
+    var up=[0,1,0];
+    var Tcamera=m4.inverse(m4.lookAt(eye,target,up));   
+    
+    var Tmodelview=m4.multiply(Tmodel,Tcamera);
+	
+	//arrow objects
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	
+	//game variable, whether game is running or over
+	var game = "running";
+	
+	//main loop
+	function update() {
+	
+		//clear canvas
+		canvas.width = canvas.width;
+		
+		//updateCamera();
+		
+		
+		//resetGame();
+		
+		drawArrow(upArrow, Tmodelview);
+		
+		window.requestAnimationFrame(update);
+	}
+	
+	//bring ui to original setup
+	function resetGame() {
+		
+	}
+	
+	//update the camera with new slider value
+	function updateCamera() {
+		
+		//update main modelview
+		angle1 = slider1.value*0.01*Math.PI;
+		angle3 = (slider2.value * 3) + 300;
+		
+		//decide camera view
+		if(ballView.checked) {
+			eye = [tennisBall.xc + 100, tennisBall.yc + 100, tennisBall.zc + 100];
+		}
+		else {
+			eye=[500*Math.cos(angle1),angle3,500*Math.sin(angle1)];
+		}
+		
+        Tcamera=m4.inverse(m4.lookAt(eye,target,up));   
+		Tmodelview=m4.multiply(Tmodel,Tcamera);
+		
+		//update ball modelview
+		ballTmodelview=m4.multiply(ballTmodel,Tcamera);
+		
+		//update racquet modelviews
+		backTmodelview=m4.multiply(backTmodel,Tcamera);
+		forTmodelview=m4.multiply(forTmodel,Tcamera);
+	}
+	
+    drawAxes(Tcamera);
+	update();	
+	
+  }
+  draw();
+
+}
+window.onload = setup();
+
+  </script>
+</head>
+<body>
+
+</body>
+</html>
