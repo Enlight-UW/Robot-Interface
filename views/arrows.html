@@ -17,7 +17,21 @@
   <input id="slider2" type="range" min="-100" max="100" />
     <script src="twgl-full.min.js"></script>
     <script>
-function setup() { "use strict";
+	
+//global variables to determine if arrow should be spinning
+var upSpin = Math.PI * 2;
+var downSpin = Math.PI * 2;
+var leftSpin = Math.PI * 2;
+var rightSpin = Math.PI * 2;
+
+function updateSpin(up, down, left, right) {
+	upSpin += up;
+	downSpin += down;
+	leftSpin += left;
+	rightSpin += right;
+}
+
+function setup() { 
   var canvas = document.getElementById('myCanvas');
   var context = canvas.getContext('2d');
   var m4 = twgl.m4;
@@ -178,11 +192,19 @@ function setup() { "use strict";
 	var rightModView = m4.multiply(rightModel, Tcamera);
 	var downModView = m4.multiply(downModel, Tcamera);
 	
+	var upAxis = [1, 0, 0];
+	var downAxis = [1, 0, 0];
+	var leftAxis = [1, 0, 0];
+	var rightAxis = [1, 0, 0];
+	
 	//arrow objects
 	var upArrow = {xc: -40, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
 	var downArrow = {xc: 40, yc: 0, zc: 320, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
 	var leftArrow = {xc: 160, yc: 0, zc: 80, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
 	var rightArrow = {xc: -160, yc: 0, zc: 160, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
+	
+	//speed the arrows spin
+	var spinSpeed = Math.PI / 45;
 	
 	//backdrop
 	var background = {xc: 0, yc: -1, zc: 0, xr: 1600, yr: 1, zr:1600, color: "black"};
@@ -200,6 +222,7 @@ function setup() { "use strict";
 		
 		
 		//resetGame();
+		spinArrows();
 		
 		drawCube(background, Tmodelview);
 		drawArrow(upArrow, upModView);
@@ -213,6 +236,54 @@ function setup() { "use strict";
 	//bring ui to original setup
 	function resetGame() {
 		
+	}
+	
+	//spin the arrows when clicked
+	function spinArrows() {
+		
+		//spin up arrow
+		if(upSpin > 0) {
+			upModel = m4.axisRotate(upModel, upAxis, spinSpeed);
+			upModView = m4.multiply(upModel, Tcamera);
+		}
+		
+		//spin down arrow
+		if(downSpin > 0) {
+			downModel = m4.axisRotate(downModel, downAxis, spinSpeed);
+			downModView = m4.multiply(downModel, Tcamera);
+		}
+		
+		//spin left arrow
+		if(leftSpin > 0) {
+			leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed);
+			leftModView = m4.multiply(leftModel, Tcamera);
+		}
+		
+		//spin right arrow
+		if(rightSpin > 0) {
+			rightModel = m4.axisRotate(rightModel, rightAxis, spinSpeed);
+			rightModView = m4.multiply(rightModel, Tcamera);
+		}
+		
+		//calulate amonut of spin remaining
+		upSpin -= spinSpeed;
+		downSpin -= spinSpeed;
+		leftSpin -= spinSpeed;
+		rightSpin -= spinSpeed;
+		
+		//cannot have negative spin remaining
+		if(upSpin < 0) {
+			upSpin = 0;
+		}
+		if(downSpin < 0) {
+			downSpin = 0;
+		}
+		if(leftSpin < 0) {
+			leftSpin = 0;
+		}
+		if(rightSpin < 0) {
+			rightSpin = 0;
+		}
 	}
 	
 	//update the camera with new slider value
