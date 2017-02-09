@@ -89,7 +89,7 @@ function setup() { "use strict";
 	//color of head
 	context.fillStyle = arrow.fColor;
 	context.strokeStyle = arrow.sColor;
-	context.lineWidth = 10;
+	context.lineWidth = 5;
   
     // rectangle
 	context.beginPath();
@@ -168,11 +168,21 @@ function setup() { "use strict";
     
     var Tmodelview=m4.multiply(Tmodel,Tcamera);
 	
+	var upModel = Tmodel;
+	var leftModel = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
+	var rightModel = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
+	var downModel = m4.axisRotation([0, 1, 0], Math.PI);
+	
+	var upModView = Tmodelview;
+	var leftModView = m4.multiply(leftModel, Tcamera);
+	var rightModView = m4.multiply(rightModel, Tcamera);
+	var downModView = m4.multiply(downModel, Tcamera);
+	
 	//arrow objects
-	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "white", fColor: "rgb(189,32,49)"};
-	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
-	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
-	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 150, yr: 20, zr:300, sColor: "rgb(0,0,139)", fColor: "rgb(0,0,139)"};
+	var upArrow = {xc: -40, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var downArrow = {xc: 40, yc: 0, zc: 320, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var leftArrow = {xc: 160, yc: 0, zc: 80, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var rightArrow = {xc: -160, yc: 0, zc: 160, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
 	
 	//backdrop
 	var background = {xc: 0, yc: -1, zc: 0, xr: 1600, yr: 1, zr:1600, color: "black"};
@@ -192,7 +202,10 @@ function setup() { "use strict";
 		//resetGame();
 		
 		drawCube(background, Tmodelview);
-		drawArrow(upArrow, Tmodelview);
+		drawArrow(upArrow, upModView);
+		drawArrow(leftArrow, leftModView);
+		drawArrow(downArrow, downModView);
+		drawArrow(rightArrow, rightModView);
 		
 		window.requestAnimationFrame(update);
 	}
@@ -209,11 +222,15 @@ function setup() { "use strict";
 		angle1 = slider1.value*0.01*Math.PI;
 		angle3 = (slider2.value * 3) + 300;
 		
-		eye=[500*Math.cos(angle1),angle3,500*Math.sin(angle1)];
+		eye=[Math.cos(-1.57) * 500,angle3,500*Math.sin(-1.57)];
 		
         Tcamera=m4.inverse(m4.lookAt(eye,target,up));   
 		Tmodelview=m4.multiply(Tmodel,Tcamera);
-		console.log(angle1);
+		upModView = m4.multiply(upModel, Tcamera);
+	    leftModView = m4.multiply(leftModel, Tcamera);
+	    rightModView = m4.multiply(rightModel, Tcamera);
+	    downModView = m4.multiply(downModel, Tcamera);
+		console.log("angle1: " + angle1);
 		console.log(angle3);
 
 	}
