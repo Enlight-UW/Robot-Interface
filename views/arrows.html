@@ -15,14 +15,18 @@
     <br/>
   <input id="slider1" type="range" min="-100" max="100" />
   <input id="slider2" type="range" min="-100" max="100" />
+  <button onclick="updateSpin(Math.PI * 2, 0, 0, 0)">Up</button>
+  <button onclick="updateSpin(0, Math.PI * 2, 0, 0)">Down</button>
+  <button onclick="updateSpin(0, 0, Math.PI * 2, 0)">Left</button>
+  <button onclick="updateSpin(0, 0, 0, Math.PI * 2)">Right</button>
     <script src="twgl-full.min.js"></script>
     <script>
 	
 //global variables to determine if arrow should be spinning
-var upSpin = Math.PI * 2;
-var downSpin = Math.PI * 2;
-var leftSpin = Math.PI * 2;
-var rightSpin = Math.PI * 2;
+var upSpin = 0;
+var downSpin = 0;
+var leftSpin = 0;
+var rightSpin = 0;
 
 function updateSpin(up, down, left, right) {
 	upSpin += up;
@@ -186,6 +190,10 @@ function setup() {
 	var leftModel = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
 	var rightModel = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
 	var downModel = m4.axisRotation([0, 1, 0], Math.PI);
+	upModel = m4.translate(upModel, [-40, 0, 0]);
+	leftModel = m4.translate(leftModel, [160, 0, 80]);
+	rightModel = m4.translate(rightModel, [-160, 0, 160]);
+	downModel = m4.translate(downModel, [40, 0, 320]);
 	
 	var upModView = Tmodelview;
 	var leftModView = m4.multiply(leftModel, Tcamera);
@@ -198,10 +206,10 @@ function setup() {
 	var rightAxis = [1, 0, 0];
 	
 	//arrow objects
-	var upArrow = {xc: -40, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
-	var downArrow = {xc: 40, yc: 0, zc: 320, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
-	var leftArrow = {xc: 160, yc: 0, zc: 80, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
-	var rightArrow = {xc: -160, yc: 0, zc: 160, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
 	
 	//speed the arrows spin
 	var spinSpeed = Math.PI / 45;
