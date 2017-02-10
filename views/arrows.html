@@ -19,6 +19,7 @@
   <button onclick="updateSpin(0, Math.PI * 2, 0, 0)">Down</button>
   <button onclick="updateSpin(0, 0, Math.PI * 2, 0)">Left</button>
   <button onclick="updateSpin(0, 0, 0, Math.PI * 2)">Right</button>
+  <button onclick="startQueueMove()">Submit</button>
     <script src="twgl-full.min.js"></script>
     <script>
 	
@@ -28,11 +29,49 @@ var downSpin = 0;
 var leftSpin = 0;
 var rightSpin = 0;
 
+//multipliers for speed
+var upSpeed = 0;
+var downSpeed = 0;
+var leftSpeed = 0;
+var rightSpeed = 0;
+
+//queue of directions sent, function replaces them with objects when used
+var newArrows = [];
+
+//speed of queue after submission
+var queueSpeed = 0;
+
+//call this function from outside to spin the arrows, values are how far you want them to rotate
 function updateSpin(up, down, left, right) {
+
+	//add value to speed
 	upSpin += up;
 	downSpin += down;
 	leftSpin += left;
 	rightSpin += right;
+	
+	//increase multipliers for each call
+	if(up > 0) {
+		upSpeed++;
+		newArrows.push("up");
+	}
+	if(down > 0) {
+		downSpeed++;
+		newArrows.push("down");
+	}
+	if(left > 0) {
+		leftSpeed++;
+		newArrows.push("left");
+	}
+	if(right > 0) {
+		rightSpeed++;
+		newArrows.push("right");
+	}
+}
+
+//change the speed so the arrow queue moves, call from outside after submitting moves
+function startQueueMove() {
+	queueSpeed = 2;
 }
 
 function setup() { 
@@ -190,10 +229,10 @@ function setup() {
 	var leftModel = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
 	var rightModel = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
 	var downModel = m4.axisRotation([0, 1, 0], Math.PI);
-	upModel = m4.translate(upModel, [-40, 0, 0]);
-	leftModel = m4.translate(leftModel, [160, 0, 80]);
-	rightModel = m4.translate(rightModel, [-160, 0, 160]);
-	downModel = m4.translate(downModel, [40, 0, 320]);
+	upModel = m4.translate(upModel, [-240, 0, 0]);
+	leftModel = m4.translate(leftModel, [160, 0, -120]);
+	rightModel = m4.translate(rightModel, [-160, 0, 360]);
+	downModel = m4.translate(downModel, [240, 0, 320]);
 	
 	var upModView = Tmodelview;
 	var leftModView = m4.multiply(leftModel, Tcamera);
@@ -206,16 +245,25 @@ function setup() {
 	var rightAxis = [1, 0, 0];
 	
 	//arrow objects
-	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
-	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)"};
-	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
-	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)"};
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up"};
+	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "down"};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "left"};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "right"};
 	
 	//speed the arrows spin
 	var spinSpeed = Math.PI / 45;
 	
 	//backdrop
 	var background = {xc: 0, yc: -1, zc: 0, xr: 1600, yr: 1, zr:1600, color: "black"};
+	
+	//queue divider
+	var divider = {xc: 40, yc: 0, zc: 0, xr: 5, yr: 5, zr:800, color: "white", fColor: "rgb(189,32,49)", direction: "up"};
+	
+	//queue of arrow commands
+	var arrowQueue = [];
+	
+	//temporary model used to make model views for queue
+	var tempModel;
 	
 	//game variable, whether game is running or over
 	var game = "running";
@@ -228,15 +276,35 @@ function setup() {
 		
 		updateCamera();
 		
+		//draw the background
+		drawCube(background, Tmodelview);
+		
 		
 		//resetGame();
 		spinArrows();
 		
-		drawCube(background, Tmodelview);
+		addToArrowQueue();
+		moveArrowQueue();
+		buildArrowQueue();
+		drawArrowQueue();
+		
+		if(arrowQueue.length > 1) {
+			console.log("direction = " + arrowQueue[1].direction);
+			console.log("radius = " + arrowQueue[1].xr);
+			console.log("height = " + arrowQueue[1].height);
+			console.log("length = " + arrowQueue.length);
+		}
+		
+		
+		
+		//draw the arrows
 		drawArrow(upArrow, upModView);
 		drawArrow(leftArrow, leftModView);
 		drawArrow(downArrow, downModView);
 		drawArrow(rightArrow, rightModView);
+		
+		//draw the dividing line-height
+		drawCube(divider, Tmodelview);		
 		
 		window.requestAnimationFrame(update);
 	}
@@ -246,51 +314,126 @@ function setup() {
 		
 	}
 	
+	//turn newly sent arrow commands into arrows
+	function addToArrowQueue() {
+	
+		while(newArrows.length > 0) {
+			
+			//turn the command into an arrow
+			//arrowQueue.push(upArrow);
+			arrowQueue.push({xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up"});
+			
+			//set the direction of the arrow
+			arrowQueue[arrowQueue.length - 1].direction = newArrows[0];
+			
+			//set the position of the arrow
+			arrowQueue[arrowQueue.length - 1].height = -150 * (arrowQueue.length - 1) + 300;
+			
+			//scale the arrow
+			arrowQueue[arrowQueue.length - 1].xr *= 0.5;
+			arrowQueue[arrowQueue.length - 1].yr *= 0.5;
+			arrowQueue[arrowQueue.length - 1].zr *= 0.5;
+			
+			//dequeue the arrow added
+			newArrows.shift();
+		}
+		
+	}
+	
+	//move arrows in arrow queue after being submitted
+	function moveArrowQueue() { 
+	
+		for(var i = 0; i < arrowQueue.length; i++) {
+			arrowQueue[i].height += queueSpeed;
+			
+		}
+	}
+	
+	//create model views for arrow queue
+	function buildArrowQueue() {
+	
+		for(var i = 0; i < arrowQueue.length; i++) {
+			//position the arrow
+			arrowQueue[i].model = m4.translation([140, 0, arrowQueue[i].height]);
+			
+			//set the direction
+			if(arrowQueue[i].direction == "down") {
+				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI);
+			}
+			if(arrowQueue[i].direction == "left") {
+				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * 0.5);
+			}
+			if(arrowQueue[i].direction == "right") {
+				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * -0.5);
+			}
+			
+			
+			arrowQueue[i].modelView = m4.multiply(arrowQueue[i].model, Tcamera);
+			
+		}
+		
+	}
+	
+	//draw the arrow queue
+	function drawArrowQueue() {
+		for(var i = 0; i < arrowQueue.length; i++) {
+			
+			drawArrow(arrowQueue[i], arrowQueue[i].modelView);
+			
+		}
+		
+		console.log(arrowQueue.length + " arrows drawn");
+	}
+	
 	//spin the arrows when clicked
 	function spinArrows() {
 		
 		//spin up arrow
 		if(upSpin > 0) {
-			upModel = m4.axisRotate(upModel, upAxis, spinSpeed);
+			upModel = m4.axisRotate(upModel, upAxis, spinSpeed * upSpeed);
 			upModView = m4.multiply(upModel, Tcamera);
 		}
 		
 		//spin down arrow
 		if(downSpin > 0) {
-			downModel = m4.axisRotate(downModel, downAxis, spinSpeed);
+			downModel = m4.axisRotate(downModel, downAxis, spinSpeed * downSpeed);
 			downModView = m4.multiply(downModel, Tcamera);
 		}
 		
 		//spin left arrow
 		if(leftSpin > 0) {
-			leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed);
+			leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed * leftSpeed);
 			leftModView = m4.multiply(leftModel, Tcamera);
 		}
 		
 		//spin right arrow
 		if(rightSpin > 0) {
-			rightModel = m4.axisRotate(rightModel, rightAxis, spinSpeed);
+			rightModel = m4.axisRotate(rightModel, rightAxis, spinSpeed * rightSpeed);
 			rightModView = m4.multiply(rightModel, Tcamera);
 		}
 		
 		//calulate amonut of spin remaining
-		upSpin -= spinSpeed;
-		downSpin -= spinSpeed;
-		leftSpin -= spinSpeed;
-		rightSpin -= spinSpeed;
+		upSpin -= spinSpeed * upSpeed;
+		downSpin -= spinSpeed * downSpeed;
+		leftSpin -= spinSpeed * leftSpeed;
+		rightSpin -= spinSpeed * rightSpeed;
 		
 		//cannot have negative spin remaining
-		if(upSpin < 0) {
+		if(upSpin <= 0) {
 			upSpin = 0;
+			upSpeed = 0;
 		}
-		if(downSpin < 0) {
+		if(downSpin <= 0) {
 			downSpin = 0;
+			downSpeed = 0;
 		}
-		if(leftSpin < 0) {
+		if(leftSpin <= 0) {
 			leftSpin = 0;
+			leftSpeed = 0;
 		}
-		if(rightSpin < 0) {
+		if(rightSpin <= 0) {
 			rightSpin = 0;
+			rightSpeed = 0;
 		}
 	}
 	
@@ -309,8 +452,8 @@ function setup() {
 	    leftModView = m4.multiply(leftModel, Tcamera);
 	    rightModView = m4.multiply(rightModel, Tcamera);
 	    downModView = m4.multiply(downModel, Tcamera);
-		console.log("angle1: " + angle1);
-		console.log(angle3);
+		//console.log("angle1: " + angle1);
+		//console.log(angle3);
 
 	}
 	
