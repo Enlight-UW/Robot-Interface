@@ -245,13 +245,16 @@ function setup() {
 	var rightAxis = [1, 0, 0];
 	
 	//arrow objects
-	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up"};
-	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "down"};
-	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "left"};
-	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "right"};
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
+	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "down", currAngle: 0};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
 	
 	//speed the arrows spin
 	var spinSpeed = Math.PI / 45;
+	
+	//speed the arrows recover at after spin
+	var recoverSpeed = Math.PI / 10;
 	
 	//backdrop
 	var background = {xc: 0, yc: -1, zc: 0, xr: 1600, yr: 1, zr:1600, color: "black"};
@@ -414,26 +417,85 @@ function setup() {
 		
 		//calulate amonut of spin remaining
 		upSpin -= spinSpeed * upSpeed;
-		downSpin -= spinSpeed * downSpeed;
-		leftSpin -= spinSpeed * leftSpeed;
-		rightSpin -= spinSpeed * rightSpeed;
+		upArrow.currAngle -= spinSpeed * upSpeed;
+		if(upArrow.currAngle < 0) {
+			upArrow.currAngle = Math.PI * 2 + upArrow.currAngle;
+		}
 		
-		//cannot have negative spin remaining
+		downSpin -= spinSpeed * downSpeed;
+		downArrow.currAngle -= spinSpeed * downSpeed;
+		if(downArrow.currAngle < 0) {
+			downArrow.currAngle = Math.PI * 2 + downArrow.currAngle;
+		}
+		
+		leftSpin -= spinSpeed * leftSpeed;
+		leftArrow.currAngle -= spinSpeed * leftSpeed;
+		if(leftArrow.currAngle < 0) {
+			leftArrow.currAngle = Math.PI * 2 + leftArrow.currAngle;
+		}
+		
+		rightSpin -= spinSpeed * rightSpeed;
+		rightArrow.currAngle -= spinSpeed * rightSpeed;
+		if(rightArrow.currAngle < 0) {
+			rightArrow.currAngle = Math.PI * 2 + rightArrow.currAngle;
+		}
+		
+		//cannot have negative spin remaining, make sure arrows end at correct angle
 		if(upSpin <= 0) {
 			upSpin = 0;
 			upSpeed = 0;
+			if(upArrow.currAngle > recoverSpeed) {
+				upArrow.currAngle -= recoverSpeed;
+				upModel = m4.axisRotate(upModel, upAxis, recoverSpeed);
+				upModView = m4.multiply(upModel, Tcamera);
+			}
+			else if(upArrow.currAngle > 0) {
+				upModel = m4.axisRotate(upModel, upAxis, upArrow.currAngle);
+				upModView = m4.multiply(upModel, Tcamera);
+				upArrow.currAngle = 0;
+			}
 		}
 		if(downSpin <= 0) {
 			downSpin = 0;
 			downSpeed = 0;
+			if(downArrow.currAngle > recoverSpeed) {
+				downArrow.currAngle -= recoverSpeed;
+				downModel = m4.axisRotate(downModel, downAxis, recoverSpeed);
+				downModView = m4.multiply(downModel, Tcamera);
+			}
+			else if(downArrow.currAngle > 0) {
+				downModel = m4.axisRotate(downModel, downAxis, downArrow.currAngle);
+				downModView = m4.multiply(downModel, Tcamera);
+				downArrow.currAngle = 0;
+			}
 		}
 		if(leftSpin <= 0) {
 			leftSpin = 0;
 			leftSpeed = 0;
+			if(leftArrow.currAngle > recoverSpeed) {
+				leftArrow.currAngle -= recoverSpeed;
+				leftModel = m4.axisRotate(leftModel, leftAxis, recoverSpeed);
+				leftModView = m4.multiply(leftModel, Tcamera);
+			}
+			else if(leftArrow.currAngle > 0) {
+				leftModel = m4.axisRotate(leftModel, leftAxis, leftArrow.currAngle);
+				leftModView = m4.multiply(leftModel, Tcamera);
+				leftArrow.currAngle = 0;
+			}
 		}
 		if(rightSpin <= 0) {
 			rightSpin = 0;
 			rightSpeed = 0;
+			if(rightArrow.currAngle > recoverSpeed) {
+				rightArrow.currAngle -= recoverSpeed;
+				rightModel = m4.axisRotate(rightModel, rightAxis, recoverSpeed);
+				rightModView = m4.multiply(rightModel, Tcamera);
+			}
+			else if(rightArrow.currAngle > 0) {
+				rightModel = m4.axisRotate(rightModel, rightAxis, rightArrow.currAngle);
+				rightModView = m4.multiply(rightModel, Tcamera);
+				rightArrow.currAngle = 0;
+			}
 		}
 	}
 	
