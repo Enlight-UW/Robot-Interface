@@ -13,12 +13,13 @@
 	   style="border:1px solid #000;">
   </canvas>
     <br/>
-  <input id="slider1" type="range" min="-100" max="100" />
+  <input id="slider1" type="range" min="-10000" max="0" />
   <input id="slider2" type="range" min="-100" max="100" />
   <button onclick="updateSpin(Math.PI * 2, 0, 0, 0)">Up</button>
   <button onclick="updateSpin(0, Math.PI * 2, 0, 0)">Down</button>
   <button onclick="updateSpin(0, 0, Math.PI * 2, 0)">Left</button>
   <button onclick="updateSpin(0, 0, 0, Math.PI * 2)">Right</button>
+  <button onclick="undoQueueMove()">Undo</button>
   <button onclick="startQueueMove()">Submit</button>
     <script src="twgl-full.min.js"></script>
     <script>
@@ -40,6 +41,9 @@ var newArrows = [];
 
 //speed of queue after submission
 var queueSpeed = 0;
+
+//number of moves to undo
+var undoMoves = 0;
 
 //call this function from outside to spin the arrows, values are how far you want them to rotate
 function updateSpin(up, down, left, right) {
@@ -72,6 +76,11 @@ function updateSpin(up, down, left, right) {
 //change the speed so the arrow queue moves, call from outside after submitting moves
 function startQueueMove() {
 	queueSpeed = 2;
+}
+
+//each button click undoes a move
+function undoQueueMove() {
+	undoMoves++;
 }
 
 function setup() { 
@@ -239,10 +248,10 @@ function setup() {
 	var rightModView = m4.multiply(rightModel, Tcamera);
 	var downModView = m4.multiply(downModel, Tcamera);
 	
-	var upAxis = [1, 0, 0];
-	var downAxis = [1, 0, 0];
-	var leftAxis = [1, 0, 0];
-	var rightAxis = [1, 0, 0];
+	var upAxis = [0, 0, 1];
+	var downAxis = [0, 0, 1];
+	var leftAxis = [0, 0, 1];
+	var rightAxis = [0, 0, 1];
 	
 	//arrow objects
 	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
@@ -271,6 +280,9 @@ function setup() {
 	//game variable, whether game is running or over
 	var game = "running";
 	
+	//current scrolling height in arrow queue
+	var scrollHeight = 0;
+	
 	//main loop
 	function update() {
 	
@@ -287,6 +299,7 @@ function setup() {
 		spinArrows();
 		
 		addToArrowQueue();
+		undoArrowQueue();
 		moveArrowQueue();
 		buildArrowQueue();
 		drawArrowQueue();
@@ -343,6 +356,21 @@ function setup() {
 		
 	}
 	
+	//undo arrows on queue
+	function undoArrowQueue() {
+		
+		//undo an arrow for each undo move
+		while(undoMoves > 0) {
+		
+			if(arrowQueue.length > 0) {
+				arrowQueue.pop();
+			}
+			
+			undoMoves--;
+			
+		}
+	}
+	
 	//move arrows in arrow queue after being submitted
 	function moveArrowQueue() { 
 	
@@ -355,9 +383,17 @@ function setup() {
 	//create model views for arrow queue
 	function buildArrowQueue() {
 	
+		//get the scroll height
+		if(arrowQueue.length > 7) {
+			scrollHeight = 150 * (arrowQueue.length - 7);
+		}
+		else {
+			scrollHeight = 0;
+		}
+	
 		for(var i = 0; i < arrowQueue.length; i++) {
 			//position the arrow
-			arrowQueue[i].model = m4.translation([140, 0, arrowQueue[i].height]);
+			arrowQueue[i].model = m4.translation([140, 0, arrowQueue[i].height + scrollHeight]);
 			
 			//set the direction
 			if(arrowQueue[i].direction == "down") {
@@ -393,24 +429,28 @@ function setup() {
 		
 		//spin up arrow
 		if(upSpin > 0) {
+			upArrow.fColor = "rgb(153,50,204)";
 			upModel = m4.axisRotate(upModel, upAxis, spinSpeed * upSpeed);
 			upModView = m4.multiply(upModel, Tcamera);
 		}
 		
 		//spin down arrow
 		if(downSpin > 0) {
+			downArrow.fColor = "rgb(153,50,204)";
 			downModel = m4.axisRotate(downModel, downAxis, spinSpeed * downSpeed);
 			downModView = m4.multiply(downModel, Tcamera);
 		}
 		
 		//spin left arrow
 		if(leftSpin > 0) {
+			leftArrow.fColor = "rgb(153,50,204)";
 			leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed * leftSpeed);
 			leftModView = m4.multiply(leftModel, Tcamera);
 		}
 		
 		//spin right arrow
 		if(rightSpin > 0) {
+			rightArrow.fColor = "rgb(153,50,204)";
 			rightModel = m4.axisRotate(rightModel, rightAxis, spinSpeed * rightSpeed);
 			rightModView = m4.multiply(rightModel, Tcamera);
 		}
@@ -444,6 +484,7 @@ function setup() {
 		if(upSpin <= 0) {
 			upSpin = 0;
 			upSpeed = 0;
+			upArrow.fColor = "rgb(189,32,49)";
 			if(upArrow.currAngle > recoverSpeed) {
 				upArrow.currAngle -= recoverSpeed;
 				upModel = m4.axisRotate(upModel, upAxis, recoverSpeed);
@@ -458,6 +499,7 @@ function setup() {
 		if(downSpin <= 0) {
 			downSpin = 0;
 			downSpeed = 0;
+			downArrow.fColor = "rgb(189,32,49)";
 			if(downArrow.currAngle > recoverSpeed) {
 				downArrow.currAngle -= recoverSpeed;
 				downModel = m4.axisRotate(downModel, downAxis, recoverSpeed);
@@ -472,6 +514,7 @@ function setup() {
 		if(leftSpin <= 0) {
 			leftSpin = 0;
 			leftSpeed = 0;
+			leftArrow.fColor = "rgb(189,32,49)";
 			if(leftArrow.currAngle > recoverSpeed) {
 				leftArrow.currAngle -= recoverSpeed;
 				leftModel = m4.axisRotate(leftModel, leftAxis, recoverSpeed);
@@ -486,6 +529,7 @@ function setup() {
 		if(rightSpin <= 0) {
 			rightSpin = 0;
 			rightSpeed = 0;
+			rightArrow.fColor = "rgb(189,32,49)";
 			if(rightArrow.currAngle > recoverSpeed) {
 				rightArrow.currAngle -= recoverSpeed;
 				rightModel = m4.axisRotate(rightModel, rightAxis, recoverSpeed);
