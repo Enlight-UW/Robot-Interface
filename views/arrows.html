@@ -362,7 +362,7 @@ function setup() {
 		//undo an arrow for each undo move
 		while(undoMoves > 0) {
 		
-			if(arrowQueue.length > 0) {
+			if(arrowQueue.length > 0 && queueSpeed == 0) {
 				arrowQueue.pop();
 			}
 			
