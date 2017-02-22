@@ -269,10 +269,10 @@ function setup() {
 	
 	//perspective
 	var fov = fovSlider.value/180*Math.PI;
-	var perspective = m4.perspective(fov, (800/600), 0.1, 100);
+	var perspective = m4.perspective(fov, (canvas.width/canvas.height), 0.1, 100);
 	
 	//viewport
-	var viewport = m4.scaling([800,600,1]);
+	var viewport = m4.scaling([canvas.width,canvas.height,1]);
     
     var Tmodelview=m4.multiply(Tmodel,Tcamera);
 	Tmodelview = m4.multiply(Tmodelview, perspective);
@@ -282,10 +282,10 @@ function setup() {
 	var leftModel = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
 	var rightModel = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
 	var downModel = m4.axisRotation([0, 1, 0], Math.PI);
-	upModel = m4.translate(upModel, [-240, 0, 0]);
-	leftModel = m4.translate(leftModel, [160, 0, -120]);
-	rightModel = m4.translate(rightModel, [-160, 0, 360]);
-	downModel = m4.translate(downModel, [240, 0, 320]);
+	upModel = m4.translate(upModel, [-0.4*canvas.width, 0, 0]);
+	leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.4*canvas.height]);
+	rightModel = m4.translate(rightModel, [-0.2*canvas.width, 0, 1.2*canvas.height]);
+	downModel = m4.translate(downModel, [0.4*canvas.width, 0, 0.73*canvas.height]);
 	
 	var upModView = Tmodelview;
 	var leftModView = m4.multiply(leftModel, Tcamera);
@@ -298,10 +298,10 @@ function setup() {
 	var rightAxis = [0, 0, 1];
 	
 	//arrow objects
-	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
-	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "down", currAngle: 0};
-	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
-	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr: 75, sColor: "white", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
+	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "down", currAngle: 0};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr: 0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr: 0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
 	
 	//speed the arrows spin
 	var spinSpeed = Math.PI / 45;
@@ -310,10 +310,10 @@ function setup() {
 	var recoverSpeed = Math.PI / 10;
 	
 	//backdrop
-	var background = {xc: 0, yc: -200, zc: 0, xr: 1600, yr: 1, zr:1600, color: "black"};
+	var background = {xc: 0, yc: -200, zc: 0, xr: 2*canvas.width, yr: 1, zr:2*canvas.width, color: "black"};
 	
 	//queue divider
-	var divider = {xc: 40, yc: 0, zc: 0, xr: 5, yr: 5, zr:800, color: "white", fColor: "rgb(189,32,49)", direction: "up"};
+	var divider = {xc: 0*canvas.width, yc: 0, zc: 0, xr: 0.00625*canvas.width, yr: 1, zr:2*canvas.width, color: "white", fColor: "rgb(189,32,49)", direction: "up"};
 	
 	//queue of arrow commands
 	var arrowQueue = [];
@@ -438,13 +438,14 @@ function setup() {
 		while(newArrows.length > 0) {
 			
 			//turn the command into an arrow
-			arrowQueue.push({xc: 0, yc: 0, zc: 0, xr: 37.5, yr: 5, zr:75, sColor: "white", fColor: "rgb(189,32,49)", direction: "up"});
+
+			arrowQueue.push({xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0});
 			
 			//set the direction of the arrow
 			arrowQueue[arrowQueue.length - 1].direction = newArrows[0];
 			
 			//set the position of the arrow
-			arrowQueue[arrowQueue.length - 1].height = -150 * (arrowQueue.length - 1) + 300;
+			arrowQueue[arrowQueue.length - 1].height = -.35*canvas.height * (arrowQueue.length - 1) + 0.4*canvas.height;
 			
 			//scale the arrow
 			arrowQueue[arrowQueue.length - 1].xr *= 0.5;
@@ -485,8 +486,8 @@ function setup() {
 	function buildArrowQueue() {
 	
 		//get the scroll height
-		if(arrowQueue.length > 7) {
-			scrollHeight = 150 * (arrowQueue.length - 7);
+		if(arrowQueue.length > 5) {
+			scrollHeight = 0.35*canvas.height * (arrowQueue.length - 5);
 		}
 		else {
 			scrollHeight = 0;
