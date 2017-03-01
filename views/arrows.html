@@ -301,10 +301,6 @@ function setup() {
           scolor: sCol,
           view: Tx
       });
-      /*context.beginPath();
-	moveToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc + ry,zc + zr,Tx);
-	lineToTx(xc,yc + ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
-	context.closePath();*/
 	
 	//bottom half
 
@@ -317,10 +313,6 @@ function setup() {
           yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2* zr}, fcolor: fillCol,
               scolor: sCol, view: Tx
           });
-      /*context.beginPath();
-	moveToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
-	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
-	context.closePath();*/
 	
 	//left side forward
       triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr, z: zc + 2*zr},
@@ -334,10 +326,6 @@ function setup() {
       + zr}, v2: {x: xc,y: yc - yr,z: zc + 2* zr}, v3: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, fcolor: fillCol,
           scolor: sCol, view: Tx
       });
-      /*context.beginPath();
-	moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
-	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
-	context.closePath();*/
 	
 	//left side backward
 	triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr},
@@ -345,10 +333,6 @@ function setup() {
       triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc +
       yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol
           , view: Tx});
-      /*context.beginPath();
-	moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
-	lineToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
-	context.closePath();*/
 	
 	//right side forward
 	triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr
@@ -360,10 +344,7 @@ function setup() {
             x: xc - 2 * xr,y: yc + yr,z: zc +
             zr}, fcolor: fillCol,
         scolor: sCol, view: Tx});
-      /*context.beginPath();
-	moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
-	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
-	context.closePath();*/
+		
       //right side backward
 	triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*
     xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx
@@ -372,31 +353,23 @@ function setup() {
         ,z: zc + zr},
         v2: {x: xc - 2* xr,y: yc + yr,z: zc + zr}, v3: {x: xc - xr, y: yc - yr,z: zc + zr},
         fcolor: fillCol, scolor: sCol, view: Tx});
-      /*context.beginPath();
-	moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);
-	lineToTx(xc - rx,yc - ry,zc + zr,Tx);lineToTx(xc - rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
-	context.closePath();*/
 	
 	context.restore();
 	}
 
-    function buildRotateArrow(arrow, Tx) {
+    function buildRotateArrow(arrow, Tx, headView) {
 
-        var xc = 0, yc = 0, zc = 0;
+        var xc = arrow.xc, yc = arrow.yc, zc = arrow.zc;
 
-        var xr = 50, yr = 5, zr = 50;
+        var xr = 1.5* arrow.xr, yr = arrow.yr, zr = 1.5*arrow.zr;
 
-        var angInt = Math.PI / 90;
+        var angInt = Math.PI / 360;
 
-        var fColor = "Red";
-        var sColor = "Red";
+        var fColor = arrow.fColor;
+        var sColor = arrow.sColor;
 
         for(var i = 0; i < Math.PI * (3/2); i += angInt) {
             //top face
-            /*
-            triangles.push({v1: {x: xc + Math.cos(i) * xr,y: yc + Math.sin(i) * yr,z: zc + zr}, v2: {x: xc + Math.cos(i) * 0.75* xr,y: yc + Math.sin(i) * 0.75 * yr,z: zc + zr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,y: yc + Math.sin(i + (angInt/2)) * yr,z: zc + zr}, fcolor: fColor, scolor: sColor, view: Tx});
-            triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,y: yc + Math.sin(i + (angInt/2)) * 0.75 * yr,z: zc + zr}, v2: {x: xc + Math.cos(i) * 0.75* xr,y: yc + Math.sin(i) * 0.75 * yr,z: zc + zr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,y: yc + Math.sin(i + (angInt/2)) * yr,z: zc + zr}, fcolor: fColor, scolor: sColor, view: Tx});
-            */
 
             //  Michaels spit swapping triangles
             triangles.push({v1: {x: xc + Math.cos(i) * xr,z: zc + Math.sin(i) * zr,y: yc + yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc + yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc + yr}, fcolor: fColor, scolor: sColor, view: Tx});
@@ -406,96 +379,70 @@ function setup() {
             triangles.push({v1: {x: xc + Math.cos(i) * xr,z: zc + Math.sin(i) * zr,y: yc - yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc - yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc - yr}, fcolor: fColor, scolor: sColor, view: Tx});
             triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,z: zc + Math.sin(i + (angInt/2)) * 0.75 * zr,y: yc - yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc - yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc - yr}, fcolor: fColor, scolor: sColor, view: Tx});
         }
+		
+		xr = 0.5 * arrow.xr, zr = 0.75 * arrow.zr;
 
         // triangle head
         //top half
-        triangles.push({
-            v1: {x: xc, y: yc + yr, z: zc + zr},
-            v2: {x: xc + 2 * xr, y: yc + yr, z: zc + zr},
-            v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
-            fcolor: fColor,
-            sColoror: sColor,
-            view: Tx
-        });
-        triangles.push({
-            v1: {x: xc, y: yc + yr, z: zc + zr},
-            v2: {x: xc - 2 * xr, y: yc + yr, z: zc + zr},
-            v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
-            fcolor: fColor,
-            sColoror: sColor,
-            view: Tx
-        });
-        /*context.beginPath();
-         moveToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc + ry,zc + zr,Tx);
-         lineToTx(xc,yc + ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
-         context.closePath();*/
+        triangles.push(
+            {v1: {x: xc + 2.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 4.75
+            *xr,y: yc + yr, z: zc}, v3: {x: xc + 2.75*xr,y: yc + yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView});
+        triangles.push(
+            {v1: {x: xc + 2.75*xr,y: yc +
+            yr,z: zc}, v2: {x: xc + 0.75*xr,y: yc + yr,z: zc}, v3: {x: xc + 2.75*xr,y: yc + yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView
+            });
 
         //bottom half
 
         triangles.push(
-            {v1: {x: xc,y: yc - yr,z: zc + zr}, v2: {x: xc + 2
-            *xr,y: yc - yr, z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fColor,
-                sColoror: sColor, view: Tx});
+            {v1: {x: xc + 2.75*xr,y: yc - yr,z: zc}, v2: {x: xc + 4.75
+            *xr,y: yc - yr, z: zc}, v3: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView});
         triangles.push(
-            {v1: {x: xc,y: yc -
-            yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2* zr}, fcolor: fColor,
-                sColoror: sColor, view: Tx
+            {v1: {x: xc + 2.75*xr,y: yc -
+            yr,z: zc}, v2: {x: xc + 0.75*xr,y: yc - yr,z: zc}, v3: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView
             });
-        /*context.beginPath();
-         moveToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
-         lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
-         context.closePath();*/
 
         //left side forward
-        triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr, z: zc + 2*zr},
-            v3: {x: xc,y: yc - yr,z: zc + 2*zr},
+        triangles.push({v1: {x: xc + 4.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 2.75*xr,y: yc + yr, z: zc + zr},
+            v3: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr},
             fcolor: fColor,
-            sColoror: sColor, view: Tx});
+            sColoror: sColor, view: headView});
         triangles.push
-        ({v1: {x: xc + 2
+        ({v1: {x: xc + 4.75
         *xr,y: yc -
-        yr,z: zc
-        + zr}, v2: {x: xc,y: yc - yr,z: zc + 2* zr}, v3: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, fcolor: fColor,
-            sColoror: sColor, view: Tx
+        yr,z: zc}, v2: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + 4.75*xr,y: yc + yr,z: zc}, fcolor: fColor,
+            sColoror: sColor, view: headView
         });
-        /*context.beginPath();
-         moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
-         lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
-         context.closePath();*/
 
         //left side backward
-        triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr},
-            fcolor: fColor, sColoror: sColor, view: Tx});
-        triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc +
-        yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fColor, sColoror: sColor
-            , view: Tx});
-        /*context.beginPath();
-         moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
-         lineToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
-         context.closePath();*/
+        triangles.push({v1: {x: xc + 4.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 4.75*xr,y: yc - yr,z: zc}, v3: {x: xc + 3.75*xr,y: yc - yr,z: zc},
+            fcolor: fColor, sColoror: sColor, view: headView});
+        triangles.push({v1: {x: xc + 3.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 4.75*xr,y: yc +
+        yr,z: zc}, v3: {x: xc + 3.75*xr,y: yc - yr,z: zc}, fcolor: fColor, sColoror: sColor
+            , view: headView});
 
         //right side forward
-        triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr
-            ,z: zc + 2*zr}, fcolor: fColor, sColoror: sColor, view: Tx});
+        triangles.push({v1: {x: xc + 0.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 2.75*xr,y: yc + yr,z: zc + zr}, v3: {x: xc + 2.75*xr,y: yc - yr
+            ,z: zc + zr}, fcolor: fColor, sColoror: sColor, view: headView});
         triangles.push({
-            v1: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v2: {
-                x: xc,y: yc - yr
-                ,z: zc + 2 *zr}, v3: {
-                x: xc - 2 * xr,y: yc + yr,z: zc +
-                zr}, fcolor: fColor,
-            sColoror: sColor, view: Tx});
-        /*context.beginPath();
-         moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
-         lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
-         context.closePath();*/
+            v1: {x: xc + 0.75*xr,y: yc - yr,z: zc}, v2: {
+                x: xc + 2.75*xr,y: yc - yr
+                ,z: zc + zr}, v3: {
+                x: xc + 0.75 * xr,y: yc + yr,z: zc}, fcolor: fColor,
+            sColoror: sColor, view: headView});
+
         //right side backward
-        triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*
-        xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fColor, sColoror: sColor, view: Tx
+        triangles.push({v1: {x: xc + 0.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 0.75*
+        xr,y: yc - yr,z: zc}, v3: {x: xc + 1.75*xr,y: yc - yr,z: zc}, fcolor: fColor, sColoror: sColor, view: headView
         });
-        triangles.push({v1: {x: xc - xr,y: yc + yr
-            ,z: zc + zr},
-            v2: {x: xc - 2* xr,y: yc + yr,z: zc + zr}, v3: {x: xc - xr, y: yc - yr,z: zc + zr},
-            fcolor: fColor, sColoror: sColor, view: Tx});
+        triangles.push({v1: {x: xc + 1.75*xr,y: yc + yr
+            ,z: zc},
+            v2: {x: xc + 0.75* xr,y: yc + yr,z: zc}, v3: {x: xc + 1.75*xr, y: yc - yr,z: zc},
+            fcolor: fColor, sColoror: sColor, view: headView});
 
     }
 
@@ -535,6 +482,7 @@ function setup() {
 	var downModel = m4.axisRotation([0, 1, 0], Math.PI);
 	upModel = m4.translate(upModel, [-0.4*canvas.width, 0, 0]);
 	leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.4*canvas.height]);
+	leftModel = m4.rotateY(leftModel, Math.PI * 0.5);
 	rightModel = m4.translate(rightModel, [-0.2*canvas.width, 0, 1.2*canvas.height]);
 	downModel = m4.translate(downModel, [0.4*canvas.width, 0, 0.73*canvas.height]);
 	
@@ -543,16 +491,29 @@ function setup() {
 	var rightModView = m4.multiply(rightModel, Tcamera);
 	var downModView = m4.multiply(downModel, Tcamera);
 	
+	
 	var upAxis = [0, 0, 1];
 	var downAxis = [0, 0, 1];
-	var leftAxis = [0, 0, 1];
-	var rightAxis = [0, 0, 1];
+	var leftAxis = [0, 1, 0];
+	var rightAxis = [0, -1, 0];
 	
 	//arrow objects
 	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
 	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "down", currAngle: 0};
-	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr: 0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
-	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr: 0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 0.175*canvas.height, yr: 5, zr: 0.175*canvas.height, sColor: "rgb(189,32,49", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 0.175*canvas.height, yr: 5, zr: 0.175*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
+	
+	var rightHeadMod = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
+	rightHeadMod = m4.translate(rightHeadMod, [-0.2*canvas.width, 0, 1.2*canvas.height]);
+	rightHeadMod = m4.axisRotate(rightHeadMod, [0, 1, 0], Math.PI * 0.5);
+	var rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+	
+	var leftHeadMod = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
+	leftHeadMod = m4.translate(leftHeadMod, [0.2*canvas.width, 0, -0.4*canvas.height]);
+	leftHeadMod = m4.axisRotate(leftHeadMod, [0, 1, 0], Math.PI * 0.5);
+	leftHeadMod = m4.rotateX(leftHeadMod, Math.PI);
+	
+	var leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 	
 	//speed the arrows spin
 	var spinSpeed = Math.PI / 45;
@@ -585,7 +546,7 @@ function setup() {
 		canvas.width = canvas.width;
 		
 		updateCamera();
-		/*
+		
 		//draw the background
 		buildCube(background, Tmodelview);
 		
@@ -610,15 +571,14 @@ function setup() {
 		
 		//draw the arrows
 		buildArrow(upArrow, upModView);
-		buildArrow(leftArrow, leftModView);
-		buildArrow(downArrow, downModView);
-		buildArrow(rightArrow, rightModView);
+		buildRotateArrow(rightArrow, rightModView, rightHeadView);
+		buildRotateArrow(leftArrow, leftModView, leftHeadView);
 		
 		//draw the dividing line-height
 		buildCube(divider, Tmodelview);
-	    */
+	    
 
-	    buildRotateArrow(upArrow, Tmodelview);
+	    
 
 		sortShapes();
 		drawShapes();
@@ -802,6 +762,9 @@ function setup() {
 			leftArrow.fColor = "rgb(153,50,204)";
 			leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed * leftSpeed);
 			leftModView = m4.multiply(leftModel, Tcamera);
+			
+			leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, -1 * spinSpeed * leftSpeed);
+			leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 		}
 		
 		//spin right arrow
@@ -809,6 +772,9 @@ function setup() {
 			rightArrow.fColor = "rgb(153,50,204)";
 			rightModel = m4.axisRotate(rightModel, rightAxis, spinSpeed * rightSpeed);
 			rightModView = m4.multiply(rightModel, Tcamera);
+			
+			rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, spinSpeed * rightSpeed);
+			rightHeadView = m4.multiply(rightHeadMod, Tcamera);
 		}
 		
 		//calulate amonut of spin remaining
@@ -875,11 +841,15 @@ function setup() {
 				leftArrow.currAngle -= recoverSpeed;
 				leftModel = m4.axisRotate(leftModel, leftAxis, recoverSpeed);
 				leftModView = m4.multiply(leftModel, Tcamera);
+				leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, -1*recoverSpeed);
+				leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 			}
 			else if(leftArrow.currAngle > 0) {
 				leftModel = m4.axisRotate(leftModel, leftAxis, leftArrow.currAngle);
 				leftModView = m4.multiply(leftModel, Tcamera);
 				leftArrow.currAngle = 0;
+				leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, -1*leftArrow.currAngle);
+				leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 			}
 		}
 		if(rightSpin <= 0) {
@@ -890,10 +860,14 @@ function setup() {
 				rightArrow.currAngle -= recoverSpeed;
 				rightModel = m4.axisRotate(rightModel, rightAxis, recoverSpeed);
 				rightModView = m4.multiply(rightModel, Tcamera);
+				rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, recoverSpeed);
+				rightHeadView = m4.multiply(rightHeadMod, Tcamera);
 			}
 			else if(rightArrow.currAngle > 0) {
 				rightModel = m4.axisRotate(rightModel, rightAxis, rightArrow.currAngle);
 				rightModView = m4.multiply(rightModel, Tcamera);
+				rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, rightArrow.currAngle);
+				rightHeadView = m4.multiply(rightHeadMod, Tcamera);
 				rightArrow.currAngle = 0;
 			}
 		}
@@ -920,10 +894,12 @@ function setup() {
 		//upModView = m4.multiply(upModView, viewport);
 		
 	    leftModView = m4.multiply(leftModel, Tcamera);
+		leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 		//leftModView = m4.multiply(leftModView, perspective);
 		//leftModView = m4.multiply(leftModView, viewport);
 		
 	    rightModView = m4.multiply(rightModel, Tcamera);
+		rightHeadView = m4.multiply(rightHeadMod, Tcamera);
 		//rightModView = m4.multiply(rightModView, perspective);
 		//rightModView = m4.multiply(rightModView, viewport);
 		
