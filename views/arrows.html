@@ -160,100 +160,348 @@ function setup() {
 	
 	context.closePath();
   }
-  
+
   function buildArrow(arrow, Tx) {
-  
-	context.save();
-	//centers of arrow
-	var xc=arrow.xc, yc=arrow.yc, zc=arrow.zc;
-	
-	//radiuses of arrow
-    var xr=arrow.xr,yr=arrow.yr,zr=arrow.zr;
-	
-	//color of head
-	var fillCol = arrow.fColor;
-	var sCol = arrow.sColor;
-  
-    // rectangle body
-	//top face
-	triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc - zr}, v2: {x: xc + xr,y: yc + yr,z: zc - zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + xr,y: yc + yr,z: zc - zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	
-	//back face
-	triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc - zr}, v2: {x: xc - xr,y: yc - yr,z: zc - zr}, v3: {x: xc + xr,y: yc + yr,z: zc - zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc + xr,y: yc + yr,z: zc - zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	
-	//front face
-	triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc + zr}, v2: {x: xc - xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc + zr}, v2: {x: xc + xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	
-	//bottom face
-	triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc + xr,y: yc - yr,z: zc + zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	
-	//left face
-	triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc - zr}, v2: {x: xc - xr,y: yc - yr,z: zc - zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc - zr}, v2: {x: xc - xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	
-	//right face
-	triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc + xr,y: yc - yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	
-	// triangle head
-	//top half
-	triangles.push({v1: {x: xc,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v3: {x: xc,y: yc + yr,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v3: {x: xc,y: yc + yr,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	/*context.beginPath();
+
+      context.save();
+      //centers of arrow
+      var xc = arrow.xc, yc = arrow.yc, zc = arrow.zc;
+
+      //radiuses of arrow
+      var xr = arrow.xr, yr = arrow.yr, zr = arrow.zr;
+
+      //color of head
+      var fillCol = arrow.fColor;
+      var sCol = arrow.sColor;
+
+      // rectangle body
+      //top face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc + yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc + xr, y: yc + yr, z: zc + zr},
+          v2: {x: xc + xr, y: yc + yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //back face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc - zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc - zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //front face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc + zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc + zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //bottom face
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc - yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc + xr, y: yc - yr, z: zc + zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc - yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //left face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //right face
+      triangles.push({
+          v1: {x: xc + xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      // triangle head
+      //top half
+      triangles.push({
+          v1: {x: xc, y: yc + yr, z: zc + zr},
+          v2: {x: xc + 2 * xr, y: yc + yr, z: zc + zr},
+          v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc, y: yc + yr, z: zc + zr},
+          v2: {x: xc - 2 * xr, y: yc + yr, z: zc + zr},
+          v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      /*context.beginPath();
 	moveToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc + ry,zc + zr,Tx);
 	lineToTx(xc,yc + ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();*/
 	
 	//bottom half
-	triangles.push({v1: {x: xc,y: yc - yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc,y: yc - yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	/*context.beginPath();
+
+      triangles.push(
+          {v1: {x: xc,y: yc - yr,z: zc + zr}, v2: {x: xc + 2
+          *xr,y: yc - yr, z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fillCol,
+              scolor: sCol, view: Tx});
+      triangles.push(
+          {v1: {x: xc,y: yc -
+          yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2* zr}, fcolor: fillCol,
+              scolor: sCol, view: Tx
+          });
+      /*context.beginPath();
 	moveToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
 	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();*/
 	
 	//left side forward
-	triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v2: {x: xc,y: yc - yr,z: zc + 2*zr}, v3: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	/*context.beginPath();
+      triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr, z: zc + 2*zr},
+          v3: {x: xc,y: yc - yr,z: zc + 2*zr},
+          fcolor: fillCol,
+          scolor: sCol, view: Tx});
+      triangles.push
+      ({v1: {x: xc + 2
+      *xr,y: yc -
+      yr,z: zc
+      + zr}, v2: {x: xc,y: yc - yr,z: zc + 2* zr}, v3: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, fcolor: fillCol,
+          scolor: sCol, view: Tx
+      });
+      /*context.beginPath();
 	moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
 	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();*/
 	
 	//left side backward
-	triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	/*context.beginPath();
+	triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr},
+        fcolor: fillCol, scolor: sCol, view: Tx});
+      triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc +
+      yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol
+          , view: Tx});
+      /*context.beginPath();
 	moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
 	lineToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();*/
 	
 	//right side forward
-	triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v2: {x: xc,y: yc - yr,z: zc + 2*zr}, v3: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	/*context.beginPath();
+	triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr
+        ,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+	triangles.push({
+        v1: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v2: {
+            x: xc,y: yc - yr
+            ,z: zc + 2 *zr}, v3: {
+            x: xc - 2 * xr,y: yc + yr,z: zc +
+            zr}, fcolor: fillCol,
+        scolor: sCol, view: Tx});
+      /*context.beginPath();
 	moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
 	lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();*/
-	
-	//right side backward
-	triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
-	/*context.beginPath();
+      //right side backward
+	triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*
+    xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx
+    });
+	triangles.push({v1: {x: xc - xr,y: yc + yr
+        ,z: zc + zr},
+        v2: {x: xc - 2* xr,y: yc + yr,z: zc + zr}, v3: {x: xc - xr, y: yc - yr,z: zc + zr},
+        fcolor: fillCol, scolor: sCol, view: Tx});
+      /*context.beginPath();
 	moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);
 	lineToTx(xc - rx,yc - ry,zc + zr,Tx);lineToTx(xc - rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
 	context.closePath();*/
 	
 	context.restore();
-  }
+	}
 
-  function draw() {
-    // hack to clear the canvas fast
-    canvas.width = canvas.width;
+    function buildRotateArrow(arrow, Tx) {
+
+        var xc = 0, yc = 0, zc = 0;
+
+        var xr = 50, yr = 5, zr = 50;
+
+        var angInt = Math.PI / 90;
+
+        var fColor = "Red";
+        var sColor = "Red";
+
+        for(var i = 0; i < Math.PI * (3/2); i += angInt) {
+            //top face
+            /*
+            triangles.push({v1: {x: xc + Math.cos(i) * xr,y: yc + Math.sin(i) * yr,z: zc + zr}, v2: {x: xc + Math.cos(i) * 0.75* xr,y: yc + Math.sin(i) * 0.75 * yr,z: zc + zr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,y: yc + Math.sin(i + (angInt/2)) * yr,z: zc + zr}, fcolor: fColor, scolor: sColor, view: Tx});
+            triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,y: yc + Math.sin(i + (angInt/2)) * 0.75 * yr,z: zc + zr}, v2: {x: xc + Math.cos(i) * 0.75* xr,y: yc + Math.sin(i) * 0.75 * yr,z: zc + zr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,y: yc + Math.sin(i + (angInt/2)) * yr,z: zc + zr}, fcolor: fColor, scolor: sColor, view: Tx});
+            */
+
+            //  Michaels spit swapping triangles
+            triangles.push({v1: {x: xc + Math.cos(i) * xr,z: zc + Math.sin(i) * zr,y: yc + yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc + yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc + yr}, fcolor: fColor, scolor: sColor, view: Tx});
+            triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,z: zc + Math.sin(i + (angInt/2)) * 0.75 * zr,y: yc + yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc + yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc + yr}, fcolor: fColor, scolor: sColor, view: Tx});
+
+            //  THICC BOTTOM
+            triangles.push({v1: {x: xc + Math.cos(i) * xr,z: zc + Math.sin(i) * zr,y: yc - yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc - yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc - yr}, fcolor: fColor, scolor: sColor, view: Tx});
+            triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,z: zc + Math.sin(i + (angInt/2)) * 0.75 * zr,y: yc - yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc - yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc - yr}, fcolor: fColor, scolor: sColor, view: Tx});
+        }
+
+        // triangle head
+        //top half
+        triangles.push({
+            v1: {x: xc, y: yc + yr, z: zc + zr},
+            v2: {x: xc + 2 * xr, y: yc + yr, z: zc + zr},
+            v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
+            fcolor: fColor,
+            sColoror: sColor,
+            view: Tx
+        });
+        triangles.push({
+            v1: {x: xc, y: yc + yr, z: zc + zr},
+            v2: {x: xc - 2 * xr, y: yc + yr, z: zc + zr},
+            v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
+            fcolor: fColor,
+            sColoror: sColor,
+            view: Tx
+        });
+        /*context.beginPath();
+         moveToTx(xc + rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc + ry,zc + zr,Tx);
+         lineToTx(xc,yc + ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+         context.closePath();*/
+
+        //bottom half
+
+        triangles.push(
+            {v1: {x: xc,y: yc - yr,z: zc + zr}, v2: {x: xc + 2
+            *xr,y: yc - yr, z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fColor,
+                sColoror: sColor, view: Tx});
+        triangles.push(
+            {v1: {x: xc,y: yc -
+            yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2* zr}, fcolor: fColor,
+                sColoror: sColor, view: Tx
+            });
+        /*context.beginPath();
+         moveToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
+         lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+         context.closePath();*/
+
+        //left side forward
+        triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr, z: zc + 2*zr},
+            v3: {x: xc,y: yc - yr,z: zc + 2*zr},
+            fcolor: fColor,
+            sColoror: sColor, view: Tx});
+        triangles.push
+        ({v1: {x: xc + 2
+        *xr,y: yc -
+        yr,z: zc
+        + zr}, v2: {x: xc,y: yc - yr,z: zc + 2* zr}, v3: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, fcolor: fColor,
+            sColoror: sColor, view: Tx
+        });
+        /*context.beginPath();
+         moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
+         lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+         context.closePath();*/
+
+        //left side backward
+        triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr},
+            fcolor: fColor, sColoror: sColor, view: Tx});
+        triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc +
+        yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fColor, sColoror: sColor
+            , view: Tx});
+        /*context.beginPath();
+         moveToTx(xc + 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc + 2*rx,yc - ry,zc + zr,Tx);
+         lineToTx(xc + rx,yc - ry,zc + zr,Tx);lineToTx(xc + rx,yc + ry,zc + zr,Tx);context.stroke();context.fill();
+         context.closePath();*/
+
+        //right side forward
+        triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr
+            ,z: zc + 2*zr}, fcolor: fColor, sColoror: sColor, view: Tx});
+        triangles.push({
+            v1: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v2: {
+                x: xc,y: yc - yr
+                ,z: zc + 2 *zr}, v3: {
+                x: xc - 2 * xr,y: yc + yr,z: zc +
+                zr}, fcolor: fColor,
+            sColoror: sColor, view: Tx});
+        /*context.beginPath();
+         moveToTx(xc - 2*rx,yc + ry,zc + zr,Tx);lineToTx(xc,yc + ry,zc + 2*zr,Tx);
+         lineToTx(xc,yc - ry,zc + 2*zr,Tx);lineToTx(xc - 2*rx,yc - ry,zc + zr,Tx);context.stroke();context.fill();
+         context.closePath();*/
+        //right side backward
+        triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*
+        xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fColor, sColoror: sColor, view: Tx
+        });
+        triangles.push({v1: {x: xc - xr,y: yc + yr
+            ,z: zc + zr},
+            v2: {x: xc - 2* xr,y: yc + yr,z: zc + zr}, v3: {x: xc - xr, y: yc - yr,z: zc + zr},
+            fcolor: fColor, sColoror: sColor, view: Tx});
+
+    }
+
+    function draw() {
+        // hack to clear the canvas fast
+        canvas.width = canvas.width;
     
     var angle1 = slider1.value*0.01*Math.PI;
     var angle2 = 0;
@@ -262,7 +510,10 @@ function setup() {
   
     var Tmodel=m4.axisRotation(axis,angle2);
 
-    var eye=[500*Math.cos(angle1),angle3,500*Math.sin(angle1)];
+    var eye=[500*Math.cos(angle1)
+
+        ,angle3,500*Math
+            .sin(angle1)];
     var target=[0,0,0];
     var up=[0,1,0];
     var Tcamera=m4.inverse(m4.lookAt(eye,target,up));   
@@ -329,12 +580,12 @@ function setup() {
 	
 	//main loop
 	function update() {
-	
+
 		//clear canvas
 		canvas.width = canvas.width;
 		
 		updateCamera();
-		
+		/*
 		//draw the background
 		buildCube(background, Tmodelview);
 		
@@ -365,7 +616,10 @@ function setup() {
 		
 		//draw the dividing line-height
 		buildCube(divider, Tmodelview);
-		
+	    */
+
+	    buildRotateArrow(upArrow, Tmodelview);
+
 		sortShapes();
 		drawShapes();
 
@@ -688,6 +942,7 @@ function setup() {
   draw();
 
 }
+
 window.onload = setup();
 
   </script>
