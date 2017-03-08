@@ -3,13 +3,13 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
-const serialport = require('serialport');
+//const serialport = require('serialport');
 
 /**
  * Port for sending serial data on a raspberry pi
  * we will get more into this later
  */
-const port = new serialport('/dev/tty0', 9600);
+//const port = new serialport('/dev/tty0', 9600);
 
 
 /**
@@ -48,13 +48,7 @@ app.get('/', function getIndex(req, res) {
 */
 app.post('/', function handlePost(req, res) {
   console.log('POST /index');
-  console.log(req.body.cmd);
-  var i = 0;
-  var str = "";
-  for (; i < req.body.cmd.length; i++) {
-    str += req.body.cmd[i];
-  }
-  console.log();
+  console.log("Commands: " + req.body.cmd.cmd);
   // port.write(str);
   // right back to the page
   res.render('index.html');

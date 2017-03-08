@@ -28,7 +28,11 @@
     var commands = [];
     function submitCmds() {
       var element = document.getElementById("sequence");
-      element.value = commands;
+      var str = "";
+      for (var i = 0; i < commands.length; i++) {
+        str += commands[i];
+      }
+      element.value = str;
       document.getElementById("form").submit();
     };
     function addCommand(cmd) {
