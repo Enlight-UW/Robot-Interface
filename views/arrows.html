@@ -13,12 +13,8 @@
 	   style="border:1px solid #000;">
   </canvas>
     <br/>
-  <input id="slider1" type="range" min="-10000" max="0" />
-  <input id="slider2" type="range" min="-100" max="100" />
-  Zoom <input id="fovSlider" type="range" min="0" max="200" />
-  <button onclick="updateSpin(Math.PI * 2, 0, 0, 0)">Up</button>
-  <button onclick="updateSpin(0, Math.PI * 2, 0, 0)">Down</button>
   <button onclick="updateSpin(0, 0, Math.PI * 2, 0)">Left</button>
+  <button onclick="updateSpin(Math.PI * 2, 0, 0, 0)">Up</button>
   <button onclick="updateSpin(0, 0, 0, Math.PI * 2)">Right</button>
   <button onclick="undoQueueMove()">Undo</button>
   <button onclick="startQueueMove()">Submit</button>
@@ -90,12 +86,6 @@ function setup() {
   canvas.height = window.innerHeight;
   var context = canvas.getContext('2d');
   var m4 = twgl.m4;
-  
-  var slider1 = document.getElementById('slider1');
-  var slider2 = document.getElementById('slider2');
-  var fovSlider = document.getElementById('fovSlider');
-  slider1.value = 35;
-  slider2.value = 0;
   
   //store triangles to be drawn
   var triangles = [];
@@ -357,13 +347,17 @@ function setup() {
 	context.restore();
 	}
 
-    function buildRotateArrow(arrow, Tx, headView) {
+    function buildRotateArrow(arrow, Tx, headView, small) {
 
         var xc = arrow.xc, yc = arrow.yc, zc = arrow.zc;
 
         var xr = 1.5* arrow.xr, yr = arrow.yr, zr = 1.5*arrow.zr;
 
         var angInt = Math.PI / 180;
+		
+		if(small == "true") {
+			angInt = Math.PI / 45;
+		}
 
         var fColor = arrow.fColor;
         var sColor = arrow.sColor;
@@ -450,9 +444,9 @@ function setup() {
         // hack to clear the canvas fast
         canvas.width = canvas.width;
     
-    var angle1 = slider1.value*0.01*Math.PI;
+    var angle1 = 35*0.01*Math.PI;
     var angle2 = 0;
-	var angle3 = (slider2.value * 3) + 300;
+	var angle3 = 300;
     var axis = [1,1,1];
   
     var Tmodel=m4.axisRotation(axis,angle2);
@@ -466,7 +460,7 @@ function setup() {
     var Tcamera=m4.inverse(m4.lookAt(eye,target,up));   
 	
 	//perspective
-	var fov = fovSlider.value/180*Math.PI;
+	var fov = 50/180*Math.PI;
 	var perspective = m4.perspective(fov, (canvas.width/canvas.height), 0.1, 100);
 	
 	//viewport
@@ -577,8 +571,8 @@ function setup() {
 		
 		//draw the arrows
 		buildArrow(upArrow, upModView);
-		buildRotateArrow(rightArrow, rightModView, rightHeadView);
-		buildRotateArrow(leftArrow, leftModView, leftHeadView);
+		buildRotateArrow(rightArrow, rightModView, rightHeadView, "false");
+		buildRotateArrow(leftArrow, leftModView, leftHeadView, "false");
 		
 		//draw the dividing line-height
 		buildCube(divider, Tmodelview);
@@ -659,7 +653,7 @@ function setup() {
 			
 			//turn the command into an arrow
 
-			arrowQueue.push({xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0});
+			arrowQueue.push({xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0});
 			
 			//set the direction of the arrow
 			arrowQueue[arrowQueue.length - 1].direction = newArrows[0];
@@ -712,20 +706,43 @@ function setup() {
 		else {
 			scrollHeight = 0;
 		}
+		
+		/*var rightHeadMod = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
+	rightHeadMod = m4.translate(rightHeadMod, [-0.2*canvas.width, 0, 1.4*canvas.height]);
+	rightHeadMod = m4.axisRotate(rightHeadMod, [0, 1, 0], Math.PI * 0.5);
+	rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, Math.PI / 2);
+	var rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+	
+	var leftHeadMod = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
+	leftHeadMod = m4.translate(leftHeadMod, [0.2*canvas.width, 0, -0.3*canvas.height]);
+	leftHeadMod = m4.axisRotate(leftHeadMod, [0, 1, 0], Math.PI * 0.5);
+	leftHeadMod = m4.rotateZ(leftHeadMod, Math.PI);
+	leftHeadMod = m4.axisRotate(leftHeadMod, [0,1,0], Math.PI / 2);*/
 	
 		for(var i = 0; i < arrowQueue.length; i++) {
 			//position the arrow
-			arrowQueue[i].model = m4.translation([140, 0, arrowQueue[i].height + scrollHeight]);
+			arrowQueue[i].model = m4.translation([canvas.width * 0.0911, 0, arrowQueue[i].height + scrollHeight]);
 			
 			//set the direction
-			if(arrowQueue[i].direction == "down") {
-				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI);
-			}
 			if(arrowQueue[i].direction == "left") {
 				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * 0.5);
+				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, -1, 0], Math.PI * 0.5);
+				arrowQueue[i].model = m4.rotateX(arrowQueue[i].model, Math.PI);
+				
+				arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, 0, arrowQueue[i].height + scrollHeight]);
+				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+				arrowQueue[i].headModel = m4.rotateZ(arrowQueue[i].headModel, Math.PI);
+				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0,1,0], Math.PI / 2);
+				arrowQueue[i].headModView = m4.multiply(arrowQueue[i].headModel, Tcamera);
 			}
 			if(arrowQueue[i].direction == "right") {
 				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * -0.5);
+				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, -1, 0], Math.PI / 2);
+				
+				arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, 0, arrowQueue[i].height + scrollHeight]);
+				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0,1,0], Math.PI / 2);
+				arrowQueue[i].headModView = m4.multiply(arrowQueue[i].headModel, Tcamera);
 			}
 			
 			
@@ -739,7 +756,12 @@ function setup() {
 	function drawArrowQueue() {
 		for(var i = 0; i < arrowQueue.length; i++) {
 			
-			buildArrow(arrowQueue[i], arrowQueue[i].modelView);
+			if(arrowQueue[i].direction == "up") {
+				buildArrow(arrowQueue[i], arrowQueue[i].modelView);
+			}
+			else {
+				buildRotateArrow(arrowQueue[i], arrowQueue[i].modelView, arrowQueue[i].headModView, "true");
+			}
 			
 		}
 		
@@ -883,9 +905,9 @@ function setup() {
 	function updateCamera() {
 		
 		//update main modelview
-		angle1 = slider1.value*0.01*Math.PI;
-		angle3 = (slider2.value * 3) + 300;
-		fov = fovSlider.value/180*Math.PI;
+		angle1 = 35*0.01*Math.PI;
+		angle3 = 300;
+		fov = 50/180*Math.PI;
 		perspective = m4.perspective(fov, (800/600), 0.1, 100);
 		
 		eye=[Math.cos(-1.57) * 500,angle3,500*Math.sin(-1.57)];
