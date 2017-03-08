@@ -20,11 +20,38 @@
     <!--
       Input element we use to pass the commands array
     -->
-    <p id="sequence_vis" value="">
-    </p>
+    <p id="sequence_vis" value=""></p>
     <input type="hidden" name="cmd[cmd]" id="sequence" value=10>
   </body>
+  <script type="text/javascript" src="gamepad.js"></script>
   <script>
+    const gamepad = new Gamepad();
+    gamepad.on('press', 'button_1', () => {
+        console.log('UP');
+    });
+    gamepad.on('press', 'button_2', () => {
+        console.log('DOWN');
+    });
+    gamepad.on('press', 'button_3', () => {
+        console.log('RIGHT');
+    });
+    gamepad.on('press', 'button_4', () => {
+        console.log('LEFT');
+    });
+    gamepad.on('press', 'shoulder_top_left', () => {
+        console.log('TRIANGLE');
+    });
+    gamepad.on('press', 'shoulder_top_right', () => {
+        console.log('SQUARE');
+    });
+    gamepad.on('press', 'start', () => {
+        console.log('start');
+    });
+    gamepad.on('press', 'select', () => {
+        console.log('select');
+    });
+
+
     var commands = [];
     function submitCmds() {
       var element = document.getElementById("sequence");

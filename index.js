@@ -3,13 +3,14 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
-//const serialport = require('serialport');
+const path = require('path');
+const serialport = require('serialport');
 
 /**
  * Port for sending serial data on a raspberry pi
  * we will get more into this later
  */
-//const port = new serialport('/dev/tty0', 9600);
+const port = new serialport('/dev/tty0', 9600);
 
 
 /**
@@ -21,6 +22,7 @@ app.set('views', __dirname + '/views');
 // ejs is something we may use late to make the page look a little prettier
 app.engine('html', require('ejs').renderFile);
 
+app.use(express.static(path.join(__dirname, 'public'))); // space for images and static stuff
 /** bodyParser.urlencoded(options)
 * Parses the text as URL encoded data (which is how browsers tend to send form data from regular forms set to POST)
 * and exposes the resulting object (containing the keys and values) on req.body
