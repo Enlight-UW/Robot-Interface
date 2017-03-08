@@ -363,12 +363,12 @@ function setup() {
 
         var xr = 1.5* arrow.xr, yr = arrow.yr, zr = 1.5*arrow.zr;
 
-        var angInt = Math.PI / 360;
+        var angInt = Math.PI / 180;
 
         var fColor = arrow.fColor;
         var sColor = arrow.sColor;
 
-        for(var i = 0; i < Math.PI * (3/2); i += angInt) {
+        for(var i = Math.PI * (1/2); i < Math.PI * (3/2); i += angInt) {
             //top face
 
             //  Michaels spit swapping triangles
@@ -480,10 +480,14 @@ function setup() {
 	var leftModel = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
 	var rightModel = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
 	var downModel = m4.axisRotation([0, 1, 0], Math.PI);
-	upModel = m4.translate(upModel, [-0.4*canvas.width, 0, 0]);
-	leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.4*canvas.height]);
-	leftModel = m4.rotateY(leftModel, Math.PI * 0.5);
-	rightModel = m4.translate(rightModel, [-0.2*canvas.width, 0, 1.2*canvas.height]);
+	upModel = m4.translate(upModel, [-0.415*canvas.width, 0, -0.4*canvas.height]);
+	//leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.4*canvas.height]);
+	//leftModel = m4.rotateY(leftModel, Math.PI * 0.5);
+	leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.3*canvas.height]);
+	leftModel = m4.axisRotate(leftModel, [0, -1, 0], Math.PI / 2);
+	leftModel = m4.rotateX(leftModel, Math.PI);
+	rightModel = m4.translate(rightModel, [-0.2*canvas.width, 0, 1.4*canvas.height]);
+	rightModel = m4.axisRotate(rightModel, [0, -1, 0], Math.PI / 2);
 	downModel = m4.translate(downModel, [0.4*canvas.width, 0, 0.73*canvas.height]);
 	
 	var upModView = Tmodelview;
@@ -494,24 +498,26 @@ function setup() {
 	
 	var upAxis = [0, 0, 1];
 	var downAxis = [0, 0, 1];
-	var leftAxis = [0, 1, 0];
+	var leftAxis = [0, -1, 0];
 	var rightAxis = [0, -1, 0];
 	
 	//arrow objects
-	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
+	var upArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
 	var downArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "down", currAngle: 0};
-	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 0.175*canvas.height, yr: 5, zr: 0.175*canvas.height, sColor: "rgb(189,32,49", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
-	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 0.175*canvas.height, yr: 5, zr: 0.175*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
+	var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 0.155*canvas.height, yr: 5, zr: 0.155*canvas.height, sColor: "rgb(189,32,49", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
+	var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 0.155*canvas.height, yr: 5, zr: 0.155*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
 	
 	var rightHeadMod = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
-	rightHeadMod = m4.translate(rightHeadMod, [-0.2*canvas.width, 0, 1.2*canvas.height]);
+	rightHeadMod = m4.translate(rightHeadMod, [-0.2*canvas.width, 0, 1.4*canvas.height]);
 	rightHeadMod = m4.axisRotate(rightHeadMod, [0, 1, 0], Math.PI * 0.5);
+	rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, Math.PI / 2);
 	var rightHeadView = m4.multiply(rightHeadMod, Tcamera);
 	
 	var leftHeadMod = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
-	leftHeadMod = m4.translate(leftHeadMod, [0.2*canvas.width, 0, -0.4*canvas.height]);
+	leftHeadMod = m4.translate(leftHeadMod, [0.2*canvas.width, 0, -0.3*canvas.height]);
 	leftHeadMod = m4.axisRotate(leftHeadMod, [0, 1, 0], Math.PI * 0.5);
-	leftHeadMod = m4.rotateX(leftHeadMod, Math.PI);
+	leftHeadMod = m4.rotateZ(leftHeadMod, Math.PI);
+	leftHeadMod = m4.axisRotate(leftHeadMod, [0,1,0], Math.PI / 2);
 	
 	var leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 	
@@ -763,7 +769,7 @@ function setup() {
 			leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed * leftSpeed);
 			leftModView = m4.multiply(leftModel, Tcamera);
 			
-			leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, -1 * spinSpeed * leftSpeed);
+			leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, spinSpeed * leftSpeed);
 			leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 		}
 		
@@ -841,15 +847,15 @@ function setup() {
 				leftArrow.currAngle -= recoverSpeed;
 				leftModel = m4.axisRotate(leftModel, leftAxis, recoverSpeed);
 				leftModView = m4.multiply(leftModel, Tcamera);
-				leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, -1*recoverSpeed);
+				leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, recoverSpeed);
 				leftHeadView = m4.multiply(leftHeadMod, Tcamera);
 			}
 			else if(leftArrow.currAngle > 0) {
 				leftModel = m4.axisRotate(leftModel, leftAxis, leftArrow.currAngle);
 				leftModView = m4.multiply(leftModel, Tcamera);
-				leftArrow.currAngle = 0;
-				leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, -1*leftArrow.currAngle);
+				leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, leftArrow.currAngle);
 				leftHeadView = m4.multiply(leftHeadMod, Tcamera);
+				leftArrow.currAngle = 0;
 			}
 		}
 		if(rightSpin <= 0) {
