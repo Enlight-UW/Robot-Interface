@@ -10,7 +10,7 @@ const serialport = require('serialport');
  * Port for sending serial data on a raspberry pi
  * we will get more into this later
  */
-const port = new serialport('/dev/tty0', 9600);
+//const port = new serialport('/dev/tty0', 9600);
 
 
 /**

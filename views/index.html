@@ -28,27 +28,33 @@
     const gamepad = new Gamepad();
     gamepad.on('press', 'button_1', () => {
         console.log('UP');
+        addCommand('w');
     });
     gamepad.on('press', 'button_2', () => {
         console.log('DOWN');
+        addCommand('s');
     });
     gamepad.on('press', 'button_3', () => {
         console.log('RIGHT');
+        addCommand('d');
     });
     gamepad.on('press', 'button_4', () => {
         console.log('LEFT');
+        addCommand('a');
     });
     gamepad.on('press', 'shoulder_top_left', () => {
         console.log('TRIANGLE');
+        undo();
     });
     gamepad.on('press', 'shoulder_top_right', () => {
-        console.log('SQUARE');
+        console.log('SQUARE // does nothing');
     });
     gamepad.on('press', 'start', () => {
         console.log('start');
+        submitCmds();
     });
     gamepad.on('press', 'select', () => {
-        console.log('select');
+        console.log('select // does nothing');
     });
 
 
