@@ -706,18 +706,6 @@ function setup() {
 		else {
 			scrollHeight = 0;
 		}
-		
-		/*var rightHeadMod = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
-	rightHeadMod = m4.translate(rightHeadMod, [-0.2*canvas.width, 0, 1.4*canvas.height]);
-	rightHeadMod = m4.axisRotate(rightHeadMod, [0, 1, 0], Math.PI * 0.5);
-	rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, Math.PI / 2);
-	var rightHeadView = m4.multiply(rightHeadMod, Tcamera);
-	
-	var leftHeadMod = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
-	leftHeadMod = m4.translate(leftHeadMod, [0.2*canvas.width, 0, -0.3*canvas.height]);
-	leftHeadMod = m4.axisRotate(leftHeadMod, [0, 1, 0], Math.PI * 0.5);
-	leftHeadMod = m4.rotateZ(leftHeadMod, Math.PI);
-	leftHeadMod = m4.axisRotate(leftHeadMod, [0,1,0], Math.PI / 2);*/
 	
 		for(var i = 0; i < arrowQueue.length; i++) {
 			//position the arrow
@@ -729,7 +717,7 @@ function setup() {
 				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, -1, 0], Math.PI * 0.5);
 				arrowQueue[i].model = m4.rotateX(arrowQueue[i].model, Math.PI);
 				
-				arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, 0, arrowQueue[i].height + scrollHeight]);
+				arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, canvas.width * 0.0111, arrowQueue[i].height + scrollHeight]);
 				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
 				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
 				arrowQueue[i].headModel = m4.rotateZ(arrowQueue[i].headModel, Math.PI);
@@ -740,7 +728,9 @@ function setup() {
 				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * -0.5);
 				arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, -1, 0], Math.PI / 2);
 				
-				arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, 0, arrowQueue[i].height + scrollHeight]);
+				arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, canvas.width * 0.0111, arrowQueue[i].height + scrollHeight]);
+				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
 				arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0,1,0], Math.PI / 2);
 				arrowQueue[i].headModView = m4.multiply(arrowQueue[i].headModel, Tcamera);
 			}
