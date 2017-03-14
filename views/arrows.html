@@ -45,28 +45,30 @@ var undoMoves = 0;
 //call this function from outside to spin the arrows, values are how far you want them to rotate
 function updateSpin(up, down, left, right) {
 
-	//add value to speed
-	upSpin += up;
-	downSpin += down;
-	leftSpin += left;
-	rightSpin += right;
+	if(queueSpeed == 0) {
+		//add value to speed
+		upSpin += up;
+		downSpin += down;
+		leftSpin += left;
+		rightSpin += right;
 	
-	//increase multipliers for each call
-	if(up > 0) {
-		upSpeed++;
-		newArrows.push("up");
-	}
-	if(down > 0) {
-		downSpeed++;
-		newArrows.push("down");
-	}
-	if(left > 0) {
-		leftSpeed++;
-		newArrows.push("left");
-	}
-	if(right > 0) {
-		rightSpeed++;
-		newArrows.push("right");
+		//increase multipliers for each call
+		if(up > 0) {
+			upSpeed++;
+			newArrows.push("up");
+		}
+		if(down > 0) {
+			downSpeed++;
+			newArrows.push("down");
+		}
+		if(left > 0) {
+			leftSpeed++;
+			newArrows.push("left");
+		}
+		if(right > 0) {
+			rightSpeed++;
+			newArrows.push("right");
+		}
 	}
 }
 
