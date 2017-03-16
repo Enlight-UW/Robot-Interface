@@ -10,7 +10,11 @@ const serialport = require('serialport');
  * Port for sending serial data on a raspberry pi
  * we will get more into this later
  */
-//const port = new serialport('/dev/tty0', 9600);
+const port = new serialport('/dev/ttyACM0', 9600, function (event) {
+  console.log("Encountered error, did you run as root?");
+  process.exit();
+ });
+
 
 
 /**
@@ -51,7 +55,7 @@ app.get('/', function getIndex(req, res) {
 app.post('/', function handlePost(req, res) {
   console.log('POST /index');
   console.log("Commands: " + req.body.cmd.cmd);
-  // port.write(str);
+  port.write(req.body.cmd.cmd);
   // right back to the page
   res.render('index.html');
 });
