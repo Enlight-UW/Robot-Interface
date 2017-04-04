@@ -12,3 +12,11 @@ Web page to queue up a series for serial commands before sending them to an Ardu
 The views folder contains the html file that the server outputs. This file should be able to queue up
 many different 'commands' for the bot. And then on a submit use a http `POST` to send the command off
 via the express server.
+
+Use instruction:
+
+1. Plug in dancepad
+2. Connect to enlight wifi, password: tunnelbob
+3. Connect to 192.168.42:3000
+4. Controls: Arrow keys to move, triangle to undo, start to send
+5. Turn on Pi last
