@@ -4,7 +4,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const serialport = require('serialport');
+//const serialport = require('serialport');
 
 /**
  * Port for sending serial data on a raspberry pi

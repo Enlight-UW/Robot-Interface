@@ -6,14 +6,22 @@
  <form method="post" id="form" action="/">
   <body>
     <h1>Enlight Arduino-Bot interface</h1>
+    <script src="twgl-full.min.js"></script>
+    <canvas id="myCanvas"
+  	   style="border:1px solid #000;">
+    </canvas>
+    <br/>
     <!--
       NOTE: These are HTML5 buttons, so by default they have a 'submit' behaviour
       to get around this, we type="button" to remove this behaviour
     -->
-    <button type="button" class="box" onclick="addCommand('w')">Forward</button>
-    <button type="button" class="box" onclick="addCommand('s')">Back</button>
-    <button type="button" class="box" onclick="addCommand('a')">Left</button>
-    <button type="button" class="box" onclick="addCommand('d')">Right</button>
+    <input id="slider1" type="range" min="-10000" max="0" />
+    <input id="slider2" type="range" min="-100" max="100" />
+    Zoom <input id="fovSlider" type="range" min="0" max="200" />
+    <button type="button" class="box" onclick="addCommand('w');updateSpin(Math.PI * 2, 0, 0, 0);">Forward</button>
+    <button type="button" class="box" onclick="addCommand('s');updateSpin(0, Math.PI * 2, 0, 0);">Back</button>
+    <button type="button" class="box" onclick="addCommand('a');updateSpin(0, 0, Math.PI * 2, 0);">Left</button>
+    <button type="button" class="box" onclick="addCommand('d');updateSpin(0, 0, 0, Math.PI * 2);">Right</button>
     <button type="button" class="box" onclick="undo()">Oops</button>
 
     <button type="button" class="box" name="commands" onclick="submitCmds()">Submit</button>
@@ -28,22 +36,27 @@
     const gamepad = new Gamepad();
     gamepad.on('press', 'button_1', () => {
         console.log('UP');
+        updateSpin(Math.PI * 2, 0, 0, 0);
         addCommand('w');
     });
     gamepad.on('press', 'button_2', () => {
         console.log('DOWN');
+        updateSpin(0, Math.PI * 2, 0, 0);
         addCommand('s');
     });
     gamepad.on('press', 'button_3', () => {
         console.log('RIGHT');
+        updateSpin(0, 0, 0, Math.PI * 2);
         addCommand('d');
     });
     gamepad.on('press', 'button_4', () => {
         console.log('LEFT');
+        updateSpin(0, 0, Math.PI * 2, 0);
         addCommand('a');
     });
     gamepad.on('press', 'shoulder_top_left', () => {
         console.log('TRIANGLE');
+        undoQueueMove();
         undo();
     });
     gamepad.on('press', 'shoulder_top_right', () => {
@@ -51,12 +64,12 @@
     });
     gamepad.on('press', 'start', () => {
         console.log('start');
+        startQueueMove(); // So this wont really do anything.....
         submitCmds();
     });
     gamepad.on('press', 'select', () => {
         console.log('select // does nothing');
     });
-
 
     var commands = [];
     function submitCmds() {
@@ -89,5 +102,926 @@
       console.log(cmd + ' was removed from command queue');
       console.log(commands);
     };
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    //global variables to determine if arrow should be spinning
+    var upSpin = 0;
+    var downSpin = 0;
+    var leftSpin = 0;
+    var rightSpin = 0;
+
+    //multipliers for speed
+    var upSpeed = 0;
+    var downSpeed = 0;
+    var leftSpeed = 0;
+    var rightSpeed = 0;
+
+    //queue of directions sent, function replaces them with objects when used
+    var newArrows = [];
+
+    //speed of queue after submission
+    var queueSpeed = 0;
+
+    //number of moves to undo
+    var undoMoves = 0;
+
+    //call this function from outside to spin the arrows, values are how far you want them to rotate
+    function updateSpin(up, down, left, right) {
+
+    if(queueSpeed == 0) {
+        //add value to speed
+        upSpin += up;
+        downSpin += down;
+        leftSpin += left;
+        rightSpin += right;
+
+        //increase multipliers for each call
+        if(up > 0) {
+            upSpeed++;
+            newArrows.push("up");
+        }
+        if(down > 0) {
+            downSpeed++;
+            newArrows.push("down");
+        }
+        if(left > 0) {
+            leftSpeed++;
+            newArrows.push("left");
+        }
+        if(right > 0) {
+            rightSpeed++;
+            newArrows.push("right");
+        }
+    }
+    }
+
+    //change the speed so the arrow queue moves, call from outside after submitting moves
+    function startQueueMove() {
+        queueSpeed = 2;
+    }
+
+    //each button click undoes a move
+    function undoQueueMove() {
+        undoMoves++;
+    }
+
+    function setup() {
+    var canvas = document.getElementById('myCanvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    var context = canvas.getContext('2d');
+    var m4 = twgl.m4;
+
+    //store triangles to be drawn
+    var triangles = [];
+
+    function moveToTx(x,y,z,Tx) {
+    var loc = [x,y,z];
+    var locTx = m4.transformPoint(Tx,loc);
+    context.moveTo(locTx[0]+250,-locTx[1]+250);
+    }
+
+    function lineToTx(x,y,z,Tx) {
+    var loc = [x,y,z];
+    var locTx = m4.transformPoint(Tx,loc);
+    context.lineTo(locTx[0]+250,-locTx[1]+250);
+    }
+
+    function drawAxes(Tx) {
+    // A little cross on the front face, for identification
+    moveToTx(0,0,0,Tx);lineToTx(50,0,0,Tx);context.stroke();
+    moveToTx(0,0,0,Tx);lineToTx(0,150,0,Tx);context.stroke();
+    moveToTx(0,0,0,Tx);lineToTx(0,0,250,Tx);context.stroke();
+    }
+
+    function buildCube(cube, Tx) {
+
+    //centers of cube
+    var xc = cube.xc, yc=cube.yc, zc=cube.zc;
+
+    //radiuses of cube
+    var xr = cube.xr,yr=cube.yr,zr=cube.zr;
+
+    context.beginPath();
+
+    //color of cube
+    var fillCol = cube.color;
+    var sCol = cube.scolor;
+
+
+    //top face
+    triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc - zr}, v2: {x: xc + xr,y: yc + yr,z: zc - zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + xr,y: yc + yr,z: zc - zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+
+    //back face
+    triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc - zr}, v2: {x: xc - xr,y: yc - yr,z: zc - zr}, v3: {x: xc + xr,y: yc + yr,z: zc - zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc + xr,y: yc + yr,z: zc - zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+
+    //front face
+    triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc + zr}, v2: {x: xc - xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc + zr}, v2: {x: xc + xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+
+    //bottom face
+    triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({v1: {x: xc + xr,y: yc - yr,z: zc + zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+
+    //left face
+    triangles.push({v1: {x: xc - xr,y: yc + yr,z: zc - zr}, v2: {x: xc - xr,y: yc - yr,z: zc - zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({v1: {x: xc - xr,y: yc - yr,z: zc - zr}, v2: {x: xc - xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+
+    //right face
+    triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc - zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({v1: {x: xc + xr,y: yc - yr,z: zc - zr}, v2: {x: xc + xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc + yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+
+    context.closePath();
+    }
+
+    function buildArrow(arrow, Tx) {
+
+      context.save();
+      //centers of arrow
+      var xc = arrow.xc, yc = arrow.yc, zc = arrow.zc;
+
+      //radiuses of arrow
+      var xr = arrow.xr, yr = arrow.yr, zr = arrow.zr;
+
+      //color of head
+      var fillCol = arrow.fColor;
+      var sCol = arrow.sColor;
+
+      // rectangle body
+      //top face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc + yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc + xr, y: yc + yr, z: zc + zr},
+          v2: {x: xc + xr, y: yc + yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //back face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc - zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc - zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //front face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc + zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc + zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //bottom face
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc - yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc + xr, y: yc - yr, z: zc + zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc - yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //left face
+      triangles.push({
+          v1: {x: xc - xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc - xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc - xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc - xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      //right face
+      triangles.push({
+          v1: {x: xc + xr, y: yc + yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc + xr, y: yc - yr, z: zc - zr},
+          v2: {x: xc + xr, y: yc - yr, z: zc + zr},
+          v3: {x: xc + xr, y: yc + yr, z: zc + zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+      // triangle head
+      //top half
+      triangles.push({
+          v1: {x: xc, y: yc + yr, z: zc + zr},
+          v2: {x: xc + 2 * xr, y: yc + yr, z: zc + zr},
+          v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+      triangles.push({
+          v1: {x: xc, y: yc + yr, z: zc + zr},
+          v2: {x: xc - 2 * xr, y: yc + yr, z: zc + zr},
+          v3: {x: xc, y: yc + yr, z: zc + 2 * zr},
+          fcolor: fillCol,
+          scolor: sCol,
+          view: Tx
+      });
+
+    //bottom half
+
+      triangles.push(
+          {v1: {x: xc,y: yc - yr,z: zc + zr}, v2: {x: xc + 2
+          *xr,y: yc - yr, z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2*zr}, fcolor: fillCol,
+              scolor: sCol, view: Tx});
+      triangles.push(
+          {v1: {x: xc,y: yc -
+          yr,z: zc + zr}, v2: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc,y: yc - yr,z: zc + 2* zr}, fcolor: fillCol,
+              scolor: sCol, view: Tx
+          });
+
+    //left side forward
+      triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr, z: zc + 2*zr},
+          v3: {x: xc,y: yc - yr,z: zc + 2*zr},
+          fcolor: fillCol,
+          scolor: sCol, view: Tx});
+      triangles.push
+      ({v1: {x: xc + 2
+      *xr,y: yc -
+      yr,z: zc
+      + zr}, v2: {x: xc,y: yc - yr,z: zc + 2* zr}, v3: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, fcolor: fillCol,
+          scolor: sCol, view: Tx
+      });
+
+    //left side backward
+    triangles.push({v1: {x: xc + 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr},
+        fcolor: fillCol, scolor: sCol, view: Tx});
+      triangles.push({v1: {x: xc + xr,y: yc + yr,z: zc + zr}, v2: {x: xc + 2*xr,y: yc +
+      yr,z: zc + zr}, v3: {x: xc + xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol
+          , view: Tx});
+
+    //right side forward
+    triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc,y: yc + yr,z: zc + 2*zr}, v3: {x: xc,y: yc - yr
+        ,z: zc + 2*zr}, fcolor: fillCol, scolor: sCol, view: Tx});
+    triangles.push({
+        v1: {x: xc - 2*xr,y: yc - yr,z: zc + zr}, v2: {
+            x: xc,y: yc - yr
+            ,z: zc + 2 *zr}, v3: {
+            x: xc - 2 * xr,y: yc + yr,z: zc +
+            zr}, fcolor: fillCol,
+        scolor: sCol, view: Tx});
+
+      //right side backward
+    triangles.push({v1: {x: xc - 2*xr,y: yc + yr,z: zc + zr}, v2: {x: xc - 2*
+    xr,y: yc - yr,z: zc + zr}, v3: {x: xc - xr,y: yc - yr,z: zc + zr}, fcolor: fillCol, scolor: sCol, view: Tx
+    });
+    triangles.push({v1: {x: xc - xr,y: yc + yr
+        ,z: zc + zr},
+        v2: {x: xc - 2* xr,y: yc + yr,z: zc + zr}, v3: {x: xc - xr, y: yc - yr,z: zc + zr},
+        fcolor: fillCol, scolor: sCol, view: Tx});
+
+    context.restore();
+    }
+
+    function buildRotateArrow(arrow, Tx, headView, small) {
+
+        var xc = arrow.xc, yc = arrow.yc, zc = arrow.zc;
+
+        var xr = 1.5* arrow.xr, yr = arrow.yr, zr = 1.5*arrow.zr;
+
+        var angInt = Math.PI / 180;
+
+        if(small == "true") {
+            angInt = Math.PI / 45;
+        }
+
+        var fColor = arrow.fColor;
+        var sColor = arrow.sColor;
+
+        for(var i = Math.PI * (1/2); i < Math.PI * (3/2); i += angInt) {
+            //top face
+
+            //  Michaels spit swapping triangles
+            triangles.push({v1: {x: xc + Math.cos(i) * xr,z: zc + Math.sin(i) * zr,y: yc + yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc + yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc + yr}, fcolor: fColor, scolor: sColor, view: Tx});
+            triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,z: zc + Math.sin(i + (angInt/2)) * 0.75 * zr,y: yc + yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc + yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc + yr}, fcolor: fColor, scolor: sColor, view: Tx});
+
+            //  THICC BOTTOM
+            triangles.push({v1: {x: xc + Math.cos(i) * xr,z: zc + Math.sin(i) * zr,y: yc - yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc - yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc - yr}, fcolor: fColor, scolor: sColor, view: Tx});
+            triangles.push({v1: {x: xc + Math.cos(i + (angInt/2)) * 0.75 * xr,z: zc + Math.sin(i + (angInt/2)) * 0.75 * zr,y: yc - yr}, v2: {x: xc + Math.cos(i) * 0.75* xr,z: zc + Math.sin(i) * 0.75 * zr,y: yc - yr}, v3: {x: xc + Math.cos(i + (angInt/2)) * xr,z: zc + Math.sin(i + (angInt/2)) * zr,y: yc - yr}, fcolor: fColor, scolor: sColor, view: Tx});
+        }
+
+        xr = 0.5 * arrow.xr, zr = 0.75 * arrow.zr;
+
+        // triangle head
+        //top half
+        triangles.push(
+            {v1: {x: xc + 2.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 4.75
+            *xr,y: yc + yr, z: zc}, v3: {x: xc + 2.75*xr,y: yc + yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView});
+        triangles.push(
+            {v1: {x: xc + 2.75*xr,y: yc +
+            yr,z: zc}, v2: {x: xc + 0.75*xr,y: yc + yr,z: zc}, v3: {x: xc + 2.75*xr,y: yc + yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView
+            });
+
+        //bottom half
+        triangles.push(
+            {v1: {x: xc + 2.75*xr,y: yc - yr,z: zc}, v2: {x: xc + 4.75
+            *xr,y: yc - yr, z: zc}, v3: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView});
+        triangles.push(
+            {v1: {x: xc + 2.75*xr,y: yc -
+            yr,z: zc}, v2: {x: xc + 0.75*xr,y: yc - yr,z: zc}, v3: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr}, fcolor: fColor,
+                sColoror: sColor, view: headView
+            });
+
+        //left side forward
+        triangles.push({v1: {x: xc + 4.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 2.75*xr,y: yc + yr, z: zc + zr},
+            v3: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr},
+            fcolor: fColor,
+            sColoror: sColor, view: headView});
+        triangles.push
+        ({v1: {x: xc + 4.75
+        *xr,y: yc -
+        yr,z: zc}, v2: {x: xc + 2.75*xr,y: yc - yr,z: zc + zr}, v3: {x: xc + 4.75*xr,y: yc + yr,z: zc}, fcolor: fColor,
+            sColoror: sColor, view: headView
+        });
+
+        //left side backward
+        triangles.push({v1: {x: xc + 4.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 4.75*xr,y: yc - yr,z: zc}, v3: {x: xc + 3.75*xr,y: yc - yr,z: zc},
+            fcolor: fColor, sColoror: sColor, view: headView});
+        triangles.push({v1: {x: xc + 3.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 4.75*xr,y: yc +
+        yr,z: zc}, v3: {x: xc + 3.75*xr,y: yc - yr,z: zc}, fcolor: fColor, sColoror: sColor
+            , view: headView});
+
+        //right side forward
+        triangles.push({v1: {x: xc + 0.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 2.75*xr,y: yc + yr,z: zc + zr}, v3: {x: xc + 2.75*xr,y: yc - yr
+            ,z: zc + zr}, fcolor: fColor, sColoror: sColor, view: headView});
+        triangles.push({
+            v1: {x: xc + 0.75*xr,y: yc - yr,z: zc}, v2: {
+                x: xc + 2.75*xr,y: yc - yr
+                ,z: zc + zr}, v3: {
+                x: xc + 0.75 * xr,y: yc + yr,z: zc}, fcolor: fColor,
+            sColoror: sColor, view: headView});
+
+        //right side backward
+        triangles.push({v1: {x: xc + 0.75*xr,y: yc + yr,z: zc}, v2: {x: xc + 0.75*
+        xr,y: yc - yr,z: zc}, v3: {x: xc + 1.75*xr,y: yc - yr,z: zc}, fcolor: fColor, sColoror: sColor, view: headView
+        });
+        triangles.push({v1: {x: xc + 1.75*xr,y: yc + yr
+            ,z: zc},
+            v2: {x: xc + 0.75* xr,y: yc + yr,z: zc}, v3: {x: xc + 1.75*xr, y: yc - yr,z: zc},
+            fcolor: fColor, sColoror: sColor, view: headView});
+
+    }
+
+    function draw() {
+        // hack to clear the canvas fast
+        canvas.width = canvas.width;
+
+    var angle1 = 35*0.01*Math.PI;
+    var angle2 = 0;
+    var angle3 = 300;
+    var axis = [1,1,1];
+
+    var Tmodel=m4.axisRotation(axis,angle2);
+
+    var eye=[500*Math.cos(angle1)
+
+        ,angle3,500*Math
+            .sin(angle1)];
+    var target=[0,0,0];
+    var up=[0,1,0];
+    var Tcamera=m4.inverse(m4.lookAt(eye,target,up));
+
+    //perspective
+    var fov = 50/180*Math.PI;
+    var perspective = m4.perspective(fov, (canvas.width/canvas.height), 0.1, 100);
+
+    //viewport
+    var viewport = m4.scaling([canvas.width,canvas.height,1]);
+
+    var Tmodelview=m4.multiply(Tmodel,Tcamera);
+    Tmodelview = m4.multiply(Tmodelview, perspective);
+    Tmodelview = m4.multiply(Tmodelview, viewport);
+
+    var upModel = Tmodel;
+    var leftModel = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
+    var rightModel = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
+    var downModel = m4.axisRotation([0, 1, 0], Math.PI);
+    upModel = m4.translate(upModel, [-0.415*canvas.width, 0, -0.4*canvas.height]);
+    //leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.4*canvas.height]);
+    //leftModel = m4.rotateY(leftModel, Math.PI * 0.5);
+    leftModel = m4.translate(leftModel, [0.2*canvas.width, 0, -0.3*canvas.height]);
+    leftModel = m4.axisRotate(leftModel, [0, -1, 0], Math.PI / 2);
+    leftModel = m4.rotateX(leftModel, Math.PI);
+    rightModel = m4.translate(rightModel, [-0.2*canvas.width, 0, 1.4*canvas.height]);
+    rightModel = m4.axisRotate(rightModel, [0, -1, 0], Math.PI / 2);
+    downModel = m4.translate(downModel, [0.4*canvas.width, 0, 0.73*canvas.height]);
+
+    var upModView = Tmodelview;
+    var leftModView = m4.multiply(leftModel, Tcamera);
+    var rightModView = m4.multiply(rightModel, Tcamera);
+    var downModView = m4.multiply(downModel, Tcamera);
+
+
+    var upAxis = [0, 0, 1];
+    var downAxis = [0, 0, 1];
+    var leftAxis = [0, -1, 0];
+    var rightAxis = [0, -1, 0];
+
+    //arrow objects
+    var upArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0};
+    var downArrow = {xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "white", fColor: "rgb(189,32,49)", direction: "down", currAngle: 0};
+    var leftArrow = {xc: 0, yc: 0, zc: 0, xr: 0.155*canvas.height, yr: 5, zr: 0.155*canvas.height, sColor: "rgb(189,32,49", fColor: "rgb(189,32,49)", direction: "left", currAngle: 0};
+    var rightArrow = {xc: 0, yc: 0, zc: 0, xr: 0.155*canvas.height, yr: 5, zr: 0.155*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "right", currAngle: 0};
+
+    var rightHeadMod = m4.axisRotation([0, 1, 0], Math.PI * -0.5);
+    rightHeadMod = m4.translate(rightHeadMod, [-0.2*canvas.width, 0, 1.4*canvas.height]);
+    rightHeadMod = m4.axisRotate(rightHeadMod, [0, 1, 0], Math.PI * 0.5);
+    rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, Math.PI / 2);
+    var rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+
+    var leftHeadMod = m4.axisRotation([0, 1, 0], Math.PI * 0.5);
+    leftHeadMod = m4.translate(leftHeadMod, [0.2*canvas.width, 0, -0.3*canvas.height]);
+    leftHeadMod = m4.axisRotate(leftHeadMod, [0, 1, 0], Math.PI * 0.5);
+    leftHeadMod = m4.rotateZ(leftHeadMod, Math.PI);
+    leftHeadMod = m4.axisRotate(leftHeadMod, [0,1,0], Math.PI / 2);
+
+    var leftHeadView = m4.multiply(leftHeadMod, Tcamera);
+
+    //speed the arrows spin
+    var spinSpeed = Math.PI / 45;
+
+    //speed the arrows recover at after spin
+    var recoverSpeed = Math.PI / 10;
+
+    //backdrop
+    var background = {xc: 0, yc: -200, zc: 0, xr: 2*canvas.width, yr: 1, zr:2*canvas.width, color: "black"};
+
+    //queue divider
+    var divider = {xc: 0*canvas.width, yc: 0, zc: 0, xr: 0.00625*canvas.width, yr: 1, zr:2*canvas.width, color: "white", fColor: "rgb(189,32,49)", direction: "up"};
+
+    //queue of arrow commands
+    var arrowQueue = [];
+
+    //temporary model used to make model views for queue
+    var tempModel;
+
+    //game variable, whether game is running or over
+    var game = "running";
+
+    //current scrolling height in arrow queue
+    var scrollHeight = 0;
+
+    //main loop
+    function update() {
+
+        //clear canvas
+        canvas.width = canvas.width;
+
+        updateCamera();
+
+        //draw the background
+        buildCube(background, Tmodelview);
+
+
+        //resetGame();
+        spinArrows();
+
+        addToArrowQueue();
+        undoArrowQueue();
+        moveArrowQueue();
+        buildArrowQueue();
+        drawArrowQueue();
+
+        if(arrowQueue.length > 1) {
+            console.log("direction = " + arrowQueue[1].direction);
+            console.log("radius = " + arrowQueue[1].xr);
+            console.log("height = " + arrowQueue[1].height);
+            console.log("length = " + arrowQueue.length);
+        }
+
+
+
+        //draw the arrows
+        buildArrow(upArrow, upModView);
+        buildRotateArrow(rightArrow, rightModView, rightHeadView, "false");
+        buildRotateArrow(leftArrow, leftModView, leftHeadView, "false");
+
+        //draw the dividing line-height
+        buildCube(divider, Tmodelview);
+
+
+
+
+        sortShapes();
+        drawShapes();
+
+
+
+        window.requestAnimationFrame(update);
+    }
+
+    //draw triangles and nets in sorted order
+    function drawShapes() {
+
+        //continue drawing until out of shapes
+        while(triangles.length != 0) {
+            context.save();
+                context.save();
+                context.beginPath();
+
+                context.fillStyle = triangles[0].fcolor;
+                context.strokeStyle = triangles[0].scolor;
+
+                moveToTx(triangles[0].v1.x,triangles[0].v1.y,triangles[0].v1.z,triangles[0].view);lineToTx(triangles[0].v2.x,triangles[0].v2.y,triangles[0].v2.z,triangles[0].view);
+                lineToTx(triangles[0].v3.x,triangles[0].v3.y,triangles[0].v3.z,triangles[0].view);context.stroke();context.fill();
+
+                context.closePath();
+
+                //remove the drawn shpae from array
+                triangles.shift();
+                context.restore();
+
+            context.restore();
+
+        }
+
+    }
+
+    //sort triangles and nets by distance from eye
+    function sortShapes() {
+
+        var centerx = 0;
+        var centery = 0;
+        var centerz = 0;
+        var distance = 0;
+
+        //find distance of each triangle from eye
+        for(var index = 0; index < triangles.length; index++) {
+
+            centerx = (triangles[index].v1.x + triangles[index].v2.x + triangles[index].v3.x) / 3;
+            centery = (triangles[index].v1.y + triangles[index].v2.y + triangles[index].v3.y) / 3;
+            centerz = (triangles[index].v1.z + triangles[index].v2.z + triangles[index].v3.z) / 3;
+
+            distance = Math.pow(Math.pow(centerx - eye[0], 2) + Math.pow(centery - eye[1], 2) + Math.pow(centerz - eye[2], 2), 0.5);
+
+            triangles[index].distance = distance;
+
+        }
+
+        //sort by distance
+        triangles.sort(function(a, b){return b.distance-a.distance});
+
+    }
+
+    //bring ui to original setup
+    function resetGame() {
+
+    }
+
+    //turn newly sent arrow commands into arrows
+    function addToArrowQueue() {
+
+        while(newArrows.length > 0) {
+
+            //turn the command into an arrow
+
+            arrowQueue.push({xc: 0, yc: 0, zc: 0, xr: 0.046875*canvas.width, yr: 5, zr:0.175*canvas.height, sColor: "rgb(189,32,49)", fColor: "rgb(189,32,49)", direction: "up", currAngle: 0});
+
+            //set the direction of the arrow
+            arrowQueue[arrowQueue.length - 1].direction = newArrows[0];
+
+            //set the position of the arrow
+            arrowQueue[arrowQueue.length - 1].height = -.35*canvas.height * (arrowQueue.length - 1) + 0.4*canvas.height;
+
+            //scale the arrow
+            arrowQueue[arrowQueue.length - 1].xr *= 0.5;
+            arrowQueue[arrowQueue.length - 1].yr *= 0.5;
+            arrowQueue[arrowQueue.length - 1].zr *= 0.5;
+
+            //dequeue the arrow added
+            newArrows.shift();
+        }
+
+    }
+
+    //undo arrows on queue
+    function undoArrowQueue() {
+
+        //undo an arrow for each undo move
+        while(undoMoves > 0) {
+
+            if(arrowQueue.length > 0 && queueSpeed == 0) {
+                arrowQueue.pop();
+            }
+
+            undoMoves--;
+
+        }
+    }
+
+    //move arrows in arrow queue after being submitted
+    function moveArrowQueue() {
+
+        for(var i = 0; i < arrowQueue.length; i++) {
+            arrowQueue[i].height += queueSpeed;
+
+        }
+    }
+
+    //create model views for arrow queue
+    function buildArrowQueue() {
+
+        //get the scroll height
+        if(arrowQueue.length > 5) {
+            scrollHeight = 0.35*canvas.height * (arrowQueue.length - 5);
+        }
+        else {
+            scrollHeight = 0;
+        }
+
+        for(var i = 0; i < arrowQueue.length; i++) {
+            //position the arrow
+            arrowQueue[i].model = m4.translation([canvas.width * 0.0911, 0, arrowQueue[i].height + scrollHeight]);
+
+            //set the direction
+            if(arrowQueue[i].direction == "left") {
+                arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * 0.5);
+                arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, -1, 0], Math.PI * 0.5);
+                arrowQueue[i].model = m4.rotateX(arrowQueue[i].model, Math.PI);
+
+                arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, canvas.width * 0.0111, arrowQueue[i].height + scrollHeight]);
+                arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+                arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+                arrowQueue[i].headModel = m4.rotateZ(arrowQueue[i].headModel, Math.PI);
+                arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0,1,0], Math.PI / 2);
+                arrowQueue[i].headModView = m4.multiply(arrowQueue[i].headModel, Tcamera);
+            }
+            if(arrowQueue[i].direction == "right") {
+                arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, 1, 0], Math.PI * -0.5);
+                arrowQueue[i].model = m4.axisRotate(arrowQueue[i].model, [0, -1, 0], Math.PI / 2);
+
+                arrowQueue[i].headModel = m4.translation([canvas.width * 0.0911, canvas.width * 0.0111, arrowQueue[i].height + scrollHeight]);
+                arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+                arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0, 1, 0], Math.PI * 0.5);
+                arrowQueue[i].headModel = m4.axisRotate(arrowQueue[i].headModel, [0,1,0], Math.PI / 2);
+                arrowQueue[i].headModView = m4.multiply(arrowQueue[i].headModel, Tcamera);
+            }
+
+
+            arrowQueue[i].modelView = m4.multiply(arrowQueue[i].model, Tcamera);
+
+        }
+
+    }
+
+    //draw the arrow queue
+    function drawArrowQueue() {
+        for(var i = 0; i < arrowQueue.length; i++) {
+
+            if(arrowQueue[i].direction == "up") {
+                buildArrow(arrowQueue[i], arrowQueue[i].modelView);
+            }
+            else {
+                buildRotateArrow(arrowQueue[i], arrowQueue[i].modelView, arrowQueue[i].headModView, "true");
+            }
+
+        }
+
+        console.log(arrowQueue.length + " arrows drawn");
+    }
+
+    //spin the arrows when clicked
+    function spinArrows() {
+
+        //spin up arrow
+        if(upSpin > 0) {
+            upArrow.fColor = "rgb(153,50,204)";
+            upModel = m4.axisRotate(upModel, upAxis, spinSpeed * upSpeed);
+            upModView = m4.multiply(upModel, Tcamera);
+        }
+
+        //spin down arrow
+        if(downSpin > 0) {
+            downArrow.fColor = "rgb(153,50,204)";
+            downModel = m4.axisRotate(downModel, downAxis, spinSpeed * downSpeed);
+            downModView = m4.multiply(downModel, Tcamera);
+        }
+
+        //spin left arrow
+        if(leftSpin > 0) {
+            leftArrow.fColor = "rgb(153,50,204)";
+            leftModel = m4.axisRotate(leftModel, leftAxis, spinSpeed * leftSpeed);
+            leftModView = m4.multiply(leftModel, Tcamera);
+
+            leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, spinSpeed * leftSpeed);
+            leftHeadView = m4.multiply(leftHeadMod, Tcamera);
+        }
+
+        //spin right arrow
+        if(rightSpin > 0) {
+            rightArrow.fColor = "rgb(153,50,204)";
+            rightModel = m4.axisRotate(rightModel, rightAxis, spinSpeed * rightSpeed);
+            rightModView = m4.multiply(rightModel, Tcamera);
+
+            rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, spinSpeed * rightSpeed);
+            rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+        }
+
+        //calulate amonut of spin remaining
+        upSpin -= spinSpeed * upSpeed;
+        upArrow.currAngle -= spinSpeed * upSpeed;
+        if(upArrow.currAngle < 0) {
+            upArrow.currAngle = Math.PI * 2 + upArrow.currAngle;
+        }
+
+        downSpin -= spinSpeed * downSpeed;
+        downArrow.currAngle -= spinSpeed * downSpeed;
+        if(downArrow.currAngle < 0) {
+            downArrow.currAngle = Math.PI * 2 + downArrow.currAngle;
+        }
+
+        leftSpin -= spinSpeed * leftSpeed;
+        leftArrow.currAngle -= spinSpeed * leftSpeed;
+        if(leftArrow.currAngle < 0) {
+            leftArrow.currAngle = Math.PI * 2 + leftArrow.currAngle;
+        }
+
+        rightSpin -= spinSpeed * rightSpeed;
+        rightArrow.currAngle -= spinSpeed * rightSpeed;
+        if(rightArrow.currAngle < 0) {
+            rightArrow.currAngle = Math.PI * 2 + rightArrow.currAngle;
+        }
+
+        //cannot have negative spin remaining, make sure arrows end at correct angle
+        if(upSpin <= 0) {
+            upSpin = 0;
+            upSpeed = 0;
+            upArrow.fColor = "rgb(189,32,49)";
+            if(upArrow.currAngle > recoverSpeed) {
+                upArrow.currAngle -= recoverSpeed;
+                upModel = m4.axisRotate(upModel, upAxis, recoverSpeed);
+                upModView = m4.multiply(upModel, Tcamera);
+            }
+            else if(upArrow.currAngle > 0) {
+                upModel = m4.axisRotate(upModel, upAxis, upArrow.currAngle);
+                upModView = m4.multiply(upModel, Tcamera);
+                upArrow.currAngle = 0;
+            }
+        }
+        if(downSpin <= 0) {
+            downSpin = 0;
+            downSpeed = 0;
+            downArrow.fColor = "rgb(189,32,49)";
+            if(downArrow.currAngle > recoverSpeed) {
+                downArrow.currAngle -= recoverSpeed;
+                downModel = m4.axisRotate(downModel, downAxis, recoverSpeed);
+                downModView = m4.multiply(downModel, Tcamera);
+            }
+            else if(downArrow.currAngle > 0) {
+                downModel = m4.axisRotate(downModel, downAxis, downArrow.currAngle);
+                downModView = m4.multiply(downModel, Tcamera);
+                downArrow.currAngle = 0;
+            }
+        }
+        if(leftSpin <= 0) {
+            leftSpin = 0;
+            leftSpeed = 0;
+            leftArrow.fColor = "rgb(189,32,49)";
+            if(leftArrow.currAngle > recoverSpeed) {
+                leftArrow.currAngle -= recoverSpeed;
+                leftModel = m4.axisRotate(leftModel, leftAxis, recoverSpeed);
+                leftModView = m4.multiply(leftModel, Tcamera);
+                leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, recoverSpeed);
+                leftHeadView = m4.multiply(leftHeadMod, Tcamera);
+            }
+            else if(leftArrow.currAngle > 0) {
+                leftModel = m4.axisRotate(leftModel, leftAxis, leftArrow.currAngle);
+                leftModView = m4.multiply(leftModel, Tcamera);
+                leftHeadMod = m4.axisRotate(leftHeadMod, leftAxis, leftArrow.currAngle);
+                leftHeadView = m4.multiply(leftHeadMod, Tcamera);
+                leftArrow.currAngle = 0;
+            }
+        }
+        if(rightSpin <= 0) {
+            rightSpin = 0;
+            rightSpeed = 0;
+            rightArrow.fColor = "rgb(189,32,49)";
+            if(rightArrow.currAngle > recoverSpeed) {
+                rightArrow.currAngle -= recoverSpeed;
+                rightModel = m4.axisRotate(rightModel, rightAxis, recoverSpeed);
+                rightModView = m4.multiply(rightModel, Tcamera);
+                rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, recoverSpeed);
+                rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+            }
+            else if(rightArrow.currAngle > 0) {
+                rightModel = m4.axisRotate(rightModel, rightAxis, rightArrow.currAngle);
+                rightModView = m4.multiply(rightModel, Tcamera);
+                rightHeadMod = m4.axisRotate(rightHeadMod, rightAxis, rightArrow.currAngle);
+                rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+                rightArrow.currAngle = 0;
+            }
+        }
+    }
+
+    //update the camera with new slider value
+    function updateCamera() {
+
+        //update main modelview
+        angle1 = 35*0.01*Math.PI;
+        angle3 = 300;
+        fov = 50/180*Math.PI;
+        perspective = m4.perspective(fov, (800/600), 0.1, 100);
+
+        eye=[Math.cos(-1.57) * 500,angle3,500*Math.sin(-1.57)];
+
+        Tcamera=m4.inverse(m4.lookAt(eye,target,up));
+        Tmodelview=m4.multiply(Tmodel,Tcamera);
+        //Tmodelview = m4.multiply(Tmodelview, perspective);
+        //Tmodelview = m4.multiply(Tmodelview, viewport);
+
+        upModView = m4.multiply(upModel, Tcamera);
+        //upModView = m4.multiply(upModView, perspective);
+        //upModView = m4.multiply(upModView, viewport);
+
+        leftModView = m4.multiply(leftModel, Tcamera);
+        leftHeadView = m4.multiply(leftHeadMod, Tcamera);
+        //leftModView = m4.multiply(leftModView, perspective);
+        //leftModView = m4.multiply(leftModView, viewport);
+
+        rightModView = m4.multiply(rightModel, Tcamera);
+        rightHeadView = m4.multiply(rightHeadMod, Tcamera);
+        //rightModView = m4.multiply(rightModView, perspective);
+        //rightModView = m4.multiply(rightModView, viewport);
+
+        downModView = m4.multiply(downModel, Tcamera);
+        //downModView = m4.multiply(downModView, perspective);
+        //downModView = m4.multiply(downModView, viewport);
+        //console.log("angle1: " + angle1);
+        //console.log(angle3);
+
+    }
+
+    drawAxes(Tcamera);
+    update();
+
+    }
+    draw();
+
+    }
+
+    window.onload = setup();
   </script>
 </form>
