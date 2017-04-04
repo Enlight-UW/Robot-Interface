@@ -4,16 +4,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-//const serialport = require('serialport');
+const serialport = require('serialport');
 
 /**
  * Port for sending serial data on a raspberry pi
  * we will get more into this later
  */
 const port = new serialport('/dev/ttyACM0', 9600, function (event) {
-  console.log("Encountered error, did you run as root?");
-  process.exit();
- });
+});
 
 
 
