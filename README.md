@@ -17,6 +17,6 @@ Use instruction:
 
 1. Plug in dancepad
 2. Connect to enlight wifi, password: tunnelbob
-3. Connect to 192.168.42:3000
+3. Connect to 192.168.42.1:3000
 4. Controls: Arrow keys to move, triangle to undo, start to send
 5. Turn on Pi last
